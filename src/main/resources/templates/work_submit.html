@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>勤務管理</title>
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-4">
+    <h1 class="text-center">勤務管理システム</h1>
+    <h2 class="text-center">ユーザー名 : <span th:text="${username}"></span></h2>
+    <div class="carp p-4 mt-4">
+        <h3>本日の勤務記録</h3>
+        <table class="table table-bordered table-striped text-center">
+            <thead class="table-dark">
+            <tr>
+                <th>日付</th>
+                <th>出勤時間</th>
+                <th>退勤時間</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td th:text="${#temporals.format(userWorkRecord.clockInTime, 'yyyy/MM/dd')}"
+                    th:if="${userWorkRecord.clockInTime != null}"></td>
+                <td th:text="${userWorkRecord.clockInTime != null  ?
+                    #temporals.format(userWorkRecord.clockInTime, 'HH:mm') : '---' }"></td>
+                <td th:text="${userWorkRecord.clockOutTime != null ?
+            #temporals.format(userWorkRecord.clockOutTime, 'HH:mm') : '-'}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <form action="/clockIn" method="post">
+            <button type="submit" class="btn btn-success" th:disabled="${isTodayRecorded}">出勤</button>
+        </form>
+        <form th:action="${userWorkRecord.clockInTime != null}
+                  ? @{/clock-out/{id}(id=${userWorkRecord.id})} : '#'" method="POST">
+            <button type="submit" class="btn btn-danger"
+                    th:disabled="${userWorkRecord.clockInTime == null or userWorkRecord.clockOutTime !=null }">退勤
+            </button>
+        </form>
+        <form th:action="${userWorkRecord.clockInTime != null}
+            ? @{/cancel/{id}(id=${userWorkRecord.id})} : '#'" method="POST">
+            <button type="submit" class="btn btn-warning" th:disabled="${userWorkRecord.clockInTime==null}">取消
+            </button>
+        </form>
+    </div>
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <a href="/work_records" class="btn btn-info">一覧画面</a>
+        <a href="/" class="btn btn-secondary">戻る</a>
+        <a href="/gpsTest" class="btn btn-dark">位置情報画面</a>
+    </div>
+</body>
+</html>

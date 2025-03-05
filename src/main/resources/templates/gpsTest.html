@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>gpstest</title>
+</head>
+<body>
+    <h2>test</h2>
+
+    <form id="gpsForm" action="/gpsTest" method="POST">
+        <input type="hidden" id="latitude" name="latitude">
+        <input type="hidden" id="longitude" name="longitude">
+        <button type="button" onclick="getLocation()">GPSTEST</button>
+    </form>
+    <a href="/work_submit">戻る</a>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        document.getElementById("latitude").value = position.coords.latitude;
+                        document.getElementById("longitude").value = position.coords.longitude;
+                        document.getElementById("gpsForm").submit();
+                    },
+                    function(error) {
+                        alert("位置情報をーーー取得できませんでした: " + error.message);
+                    },
+                    {
+                    enableHighAccuracy: true, // GPS優先
+                    timeout: 10000, // 10秒以内に取得
+                    maximumAge: 0 // 毎回最新の位置を取得
+                    }
+                );
+            } else {
+                alert("このブラウザは----位置情報をサポートしていません。");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+2025-03-05 19:53:51.322246+09:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "WORK_RECORDS" not found (this database is empty); SQL statement:
+select wr1_0.id,wr1_0.clock_in_time,wr1_0.clock_out_time,wr1_0.username from work_records wr1_0 where wr1_0.username=? fetch first ? rows only [42104-232]
+2025-03-05 19:54:05.511979+09:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "WORK_RECORDS" not found (this database is empty); SQL statement:
+select wr1_0.id,wr1_0.clock_in_time,wr1_0.clock_out_time,wr1_0.username from work_records wr1_0 where wr1_0.username=? fetch first ? rows only [42104-232]
