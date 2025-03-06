@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 import com.example.demo.model.WorkRecord;
 import com.example.demo.repository.WorkRecordRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +10,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.System.getenv;
 
 @Controller
 //@RequestMapping("/work")
@@ -24,12 +27,14 @@ public class WorkRecordController {
     public String login (Model model){
         // message というデータを HTML 側に送る
         model.addAttribute("message","ようこそ！ログイン機能");
+
         return "login"; // templates/login.html を表示する
     }
     //sesseion にユーザー名を保存
     @PostMapping("/login")
     public String login (@RequestParam("username") String username,HttpSession session){
         session.setAttribute("username", username);
+        session.setAttribute("gpsResult",null);
         return "redirect:/work_submit";
     }
     @GetMapping("/work_submit")
@@ -53,6 +58,8 @@ public class WorkRecordController {
         }
         model.addAttribute("isTodayRecorded",isTodayRecorded);
         model.addAttribute("userWorkRecord",userWorkRecord);
+        model.addAttribute("gpsResult", session.getAttribute("gpsResult"));
+
         return "work_submit";
     }
     @PostMapping("/clockIn")
@@ -65,6 +72,8 @@ public class WorkRecordController {
         record.setUsername(username);
         record.setClockInTime( LocalDateTime.now());
         repository.save(record);
+
+
         return "redirect:/work_submit";
     }
     @PostMapping("/cancel/{id}")
@@ -99,26 +108,26 @@ public class WorkRecordController {
         model.addAttribute("userWorkRecords",userWorkRecords);
         return "work_records";
     }
+
     @GetMapping("/gpsTest")
     public  String gpsCheck (Model model){
+
         return "gpsTest";
     }
     @PostMapping("/gpsTest")
-    public String gpsTest (@RequestParam double latitude, @RequestParam double longitude, Model model) {
+    public String gpsTest (@RequestParam double lat, @RequestParam double lng, HttpSession session) {
+        //boolean gpsResult = checkGps(lat,lng);
+        session.setAttribute("gpsResult",checkGps(lat,lng));
+        return "redirect:/work_submit";
+    }
+
+    public boolean checkGps(double nowLat,double nowLon){
+        final int R = 6371000; // 地球の半径 (メートル)
         double allowedDistance = 9500.0; // 許可範囲 (メートル)
         // 会社の位置（例：東京駅） 35.681236 / 139.767125    富士見市 緯度: 35.857869 経度: 139.549208
         double companyLat = 35.857869;
         double companyLon = 139.549208;
-        System.out.println("今の位置情報1："+latitude);
-        System.out.println("今の位置情報2："+longitude);
-        boolean gpsResult = checkGps(latitude,longitude,companyLat,companyLon,allowedDistance);
-        System.out.println("位置情報判定："+gpsResult);
-        return "redirect:/gpsTest";
-    }
 
-    public boolean checkGps(double nowLat,double nowLon,double companyLat,double companyLon,double allowedDistance){
-
-        final int R = 6371000; // 地球の半径 (メートル)
         double dLat = Math.toRadians(companyLat-nowLat);
         double dLon = Math.toRadians(companyLon-nowLon);
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -130,4 +139,6 @@ public class WorkRecordController {
         System.out.println(distance);
         return  distance <= allowedDistance;
     }
+
+
 }

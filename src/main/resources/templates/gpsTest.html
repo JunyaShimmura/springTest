@@ -8,19 +8,52 @@
     <h2>test</h2>
 
     <form id="gpsForm" action="/gpsTest" method="POST">
-        <input type="hidden" id="latitude" name="latitude">
-        <input type="hidden" id="longitude" name="longitude">
+        <input type="hidden" id="lat" name="lat">
+        <input type="hidden" id="lng" name="lng">
         <button type="button" onclick="getLocation()">GPSTEST</button>
     </form>
+    <p></p>
+    <p></p>
+    <div id="map" style="height: 300px; width: 80%;"></div>
+    <p id="location">位置情報を取得中...</p>
     <a href="/work_submit">戻る</a>
 
+    <script async
+            src="https://maps.googleapis.com/maps/api/js?key=[[${googleMapsApiKey}]]&callback=initMap">
+    </script>
+
     <script>
+        function initMap() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+
+                    var map = new google.maps.Map(document.getElementById('map'), {
+                        center: { lat: lat, lng: lng },
+                        zoom: 15
+                    });
+
+                    new google.maps.Marker({
+                        position: { lat: lat, lng: lng },
+                        map: map,
+                        title: "現在地"
+                    });
+
+                    document.getElementById("location").innerText = `緯度: ${lat}, 経度: ${lng}`;
+                });
+            } else {
+                alert("位置情報を取得できません");
+            }
+        }
+
         function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
-                        document.getElementById("latitude").value = position.coords.latitude;
-                        document.getElementById("longitude").value = position.coords.longitude;
+                        document.getElementById("lat").value = position.coords.latitude;
+                        document.getElementById("lng").value = position.coords.longitude;
                         document.getElementById("gpsForm").submit();
                     },
                     function(error) {

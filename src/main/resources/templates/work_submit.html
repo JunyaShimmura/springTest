@@ -21,20 +21,21 @@
             </thead>
             <tbody>
             <tr>
-                <td th:text="${#temporals.format(userWorkRecord.clockInTime, 'yyyy/MM/dd')}"
-                    th:if="${userWorkRecord.clockInTime != null}"></td>
+                <td th:text="${userWorkRecord.clockInTime != null ?
+                    #temporals.format(userWorkRecord.clockInTime, 'yyyy/MM/dd') : '---' }"></td>
                 <td th:text="${userWorkRecord.clockInTime != null  ?
                     #temporals.format(userWorkRecord.clockInTime, 'HH:mm') : '---' }"></td>
                 <td th:text="${userWorkRecord.clockOutTime != null ?
-            #temporals.format(userWorkRecord.clockOutTime, 'HH:mm') : '-'}"></td>
+                    #temporals.format(userWorkRecord.clockOutTime, 'HH:mm') : '---'}"></td>
             </tr>
             </tbody>
         </table>
 
     </div>
-    <div class="d-flex justify-content-center gap-3 mt-4">
+    <div class="d-flex justify-content-center gap-4 mt-4">
         <form action="/clockIn" method="post">
             <button type="submit" class="btn btn-success" th:disabled="${isTodayRecorded}">出勤</button>
+
         </form>
         <form th:action="${userWorkRecord.clockInTime != null}
                   ? @{/clock-out/{id}(id=${userWorkRecord.id})} : '#'" method="POST">
@@ -50,8 +51,72 @@
     </div>
     <div class="d-flex justify-content-center gap-3 mt-4">
         <a href="/work_records" class="btn btn-info">一覧画面</a>
-        <a href="/" class="btn btn-secondary">戻る</a>
-        <a href="/gpsTest" class="btn btn-dark">位置情報画面</a>
+        <a href="/" class="btn btn-dark">戻る</a>
     </div>
+
+
+    <p id="location">位置情報を取得中...</p>
+    <div id="map" style="height: 300px; width: 80%;"></div>
+    <form id="gpsForm" action="/gpsTest" method="POST">
+        <input type="hidden" id="lat" name="lat">
+        <input type="hidden" id="lng" name="lng">
+        <button type="button" onclick="getLocation()">GPSTEST</button>
+    </form>
+    <p th:if="${gpsResult != null}">位置判定：<span th:text="${gpsResult}"></span></p>
+    <a href="/work_submit">戻る</a>
+
+    <script async
+            src="https://maps.googleapis.com/maps/api/js?key=[[${googleMapsApiKey}]]&callback=initMap">
+    </script>
+
+    <script>
+        function initMap() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+                    document.getElementById("location").innerText = `緯度: ${lat}, 経度: ${lng}`;
+
+                    var map = new google.maps.Map(document.getElementById('map'), {
+                        center: { lat: lat, lng: lng },
+                        zoom: 15
+                    });
+
+                    new google.maps.Marker({
+                        position: { lat: lat, lng: lng },
+                        map: map,
+                        title: "現在地"
+                    });
+
+
+                });
+            } else {
+                alert("位置情報を取得できません");
+            }
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        document.getElementById("lat").value = position.coords.latitude;
+                        document.getElementById("lng").value = position.coords.longitude;
+                        document.getElementById("gpsForm").submit();
+                    },
+                    function(error) {
+                        alert("位置情報をーーー取得できませんでした: " + error.message);
+                    },
+                    {
+                    enableHighAccuracy: true, // GPS優先
+                    timeout: 10000, // 10秒以内に取得
+                    maximumAge: 0 // 毎回最新の位置を取得
+                    }
+                );
+            } else {
+                alert("このブラウザは----位置情報をサポートしていません。");
+            }
+        }
+    </script>
 </body>
 </html>
