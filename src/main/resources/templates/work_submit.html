@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" >
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>勤務管理</title>
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="container mt-4">
     <h1 class="text-center">勤務管理システム</h1>
     <h2 class="text-center">ユーザー名 : <span th:text="${username}"></span></h2>
     <div class="carp p-4 mt-4">
-        <h3>本日の勤務記録</h3>
+        <h3>本日の勤務記録  <span th:text="${#dates.createNow()}"></span></h3>
         <table class="table table-bordered table-striped text-center">
             <thead class="table-dark">
             <tr>
@@ -21,9 +23,8 @@
             </thead>
             <tbody>
             <tr>
-                <td th:text="${userWorkRecord.clockInTime != null ?
-                    #temporals.format(userWorkRecord.clockInTime, 'yyyy/MM/dd') : '---' }"></td>
-                <td th:text="${userWorkRecord.clockInTime != null  ?
+                <td th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" ></td>
+                <td th:text="${isTodayRecorded  ?
                     #temporals.format(userWorkRecord.clockInTime, 'HH:mm') : '---' }"></td>
                 <td th:text="${userWorkRecord.clockOutTime != null ?
                     #temporals.format(userWorkRecord.clockOutTime, 'HH:mm') : '---'}"></td>
@@ -32,20 +33,20 @@
         </table>
 
     </div>
-    <div class="d-flex justify-content-center gap-4 mt-4">
+    <div class="d-flex justify-content-center gap-4 mt-1">
         <form action="/clockIn" method="post">
-            <button type="submit" class="btn btn-success" th:disabled="${isTodayRecorded}">出勤</button>
+            <button type="submit" class="btn btn-success btn-lg" th:disabled="${isTodayRecorded}">出勤</button>
 
         </form>
         <form th:action="${userWorkRecord.clockInTime != null}
                   ? @{/clock-out/{id}(id=${userWorkRecord.id})} : '#'" method="POST">
-            <button type="submit" class="btn btn-danger"
+            <button type="submit" class="btn btn-danger btn-lg"
                     th:disabled="${userWorkRecord.clockInTime == null or userWorkRecord.clockOutTime !=null }">退勤
             </button>
         </form>
-        <form th:action="${userWorkRecord.clockInTime != null}
+        <form th:action="${ (userWorkRecord.clockInTime != null and isTodayRecorded)}
             ? @{/cancel/{id}(id=${userWorkRecord.id})} : '#'" method="POST">
-            <button type="submit" class="btn btn-warning" th:disabled="${userWorkRecord.clockInTime==null}">取消
+            <button type="submit" class="btn btn-warning btn-lg" th:disabled="${userWorkRecord.clockInTime==null}">取消
             </button>
         </form>
     </div>
@@ -54,69 +55,27 @@
         <a href="/" class="btn btn-dark">戻る</a>
     </div>
 
-
-    <p id="location">位置情報を取得中...</p>
-    <div id="map" style="height: 300px; width: 80%;"></div>
+    <p id="locationText">位置情報を取得中...</p>
+    <div id="map" style="height: 300px; width: 100%;"></div>
     <form id="gpsForm" action="/gpsTest" method="POST">
         <input type="hidden" id="lat" name="lat">
         <input type="hidden" id="lng" name="lng">
         <button type="button" onclick="getLocation()">GPSTEST</button>
     </form>
     <p th:if="${gpsResult != null}">位置判定：<span th:text="${gpsResult}"></span></p>
-    <a href="/work_submit">戻る</a>
+    <a href="/work_submit" >戻る</a>
+    <button type="button" onclick="initMap()">位置表示</button>
 
-    <script async
-            src="https://maps.googleapis.com/maps/api/js?key=[[${googleMapsApiKey}]]&callback=initMap">
+
+    <script
+            th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${@environment.getProperty('googleMapsApiKey')}}" async defer>
+<!--            // Google Maps APIが読み込まれたらinitMap()を実行   一時的にOFF-->
+<!--     th:src="@{'https://maps.googleapis.com/maps/api/js?key='-->
+<!--    + ${@environment.getProperty('googleMapsApiKey')}-->
+<!--    + '&callback=initMap'}" async defer> -->
     </script>
 
-    <script>
-        function initMap() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
+    <script th:src="@{/js/map.js}" defer></script>
 
-                    var lat = position.coords.latitude;
-                    var lng = position.coords.longitude;
-                    document.getElementById("location").innerText = `緯度: ${lat}, 経度: ${lng}`;
-
-                    var map = new google.maps.Map(document.getElementById('map'), {
-                        center: { lat: lat, lng: lng },
-                        zoom: 15
-                    });
-
-                    new google.maps.Marker({
-                        position: { lat: lat, lng: lng },
-                        map: map,
-                        title: "現在地"
-                    });
-
-
-                });
-            } else {
-                alert("位置情報を取得できません");
-            }
-        }
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        document.getElementById("lat").value = position.coords.latitude;
-                        document.getElementById("lng").value = position.coords.longitude;
-                        document.getElementById("gpsForm").submit();
-                    },
-                    function(error) {
-                        alert("位置情報をーーー取得できませんでした: " + error.message);
-                    },
-                    {
-                    enableHighAccuracy: true, // GPS優先
-                    timeout: 10000, // 10秒以内に取得
-                    maximumAge: 0 // 毎回最新の位置を取得
-                    }
-                );
-            } else {
-                alert("このブラウザは----位置情報をサポートしていません。");
-            }
-        }
-    </script>
 </body>
 </html>
