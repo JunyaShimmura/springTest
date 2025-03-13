@@ -1,29 +1,38 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>勤務管理</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<meta charset="UTF-8">
+<title>勤務管理</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
-<body class="container mt-4">
-    <h1>勤務管理システム</h1>
-    <h2 class="mb-4">勤務記録一覧</h2>
-    <h3>ユーザー名：<span th:text="${username}"></span></h3>
-    <div th:if="${userWorkRecords != null and not #lists.isEmpty(userWorkRecords)}">
-        <table>
-            <tr>
-                <th>出勤時間</th>
-                <th>退勤時間</th>
-            </tr>
-            <tr th:each="record : ${userWorkRecords}">
-                <td th:text="${#temporals.format(record.clockInTime,'yyyy/MM/dd HH:mm  ' )}"  ></td>
-                <td th:if="${record.clockOutTime != null}"
-                    th:text="${#temporals.format(record.clockOutTime,'yyyy/MM/dd HH:mm  ' )}"></td>
-            </tr>
-        </table>
+<body class="container mt-4 bg-body-secondary">
+    <h1 class="text-center">勤務管理システム</h1>
+    <h2>Username : <span th:text="${username}"></span></h2>
+    <div class="card p-4 mt-2">
+
+        <h3 class="mb-4">勤務記録一覧</h3>
+        <div th:if="${userWorkRecords != null and not #lists.isEmpty(userWorkRecords)}">
+            <table class="table table-bordered table-striped text-center">
+                <thead class="table-dark">
+                <tr>
+                    <th>出勤記録</th>
+                    <th>退勤記録</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="record : ${userWorkRecords}">
+                    <td th:text="${#temporals.format(record.clockInTime,'yyyy/MM/dd HH:mm  ' )}"></td>
+                    <td th:if="${record.clockOutTime != null}"
+                        th:text="${#temporals.format(record.clockOutTime,'yyyy/MM/dd HH:mm  ' )}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     <p th:if="${userWorkRecords == null or #lists.isEmpty(userWorkRecords)}">データがありません</p>
+
     <a href="/">戻る</a>
 </body>
 </html>

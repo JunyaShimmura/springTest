@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,11 +26,13 @@ public class WorkRecordController {
         this.repository = repository;
     }
 
+
+
     @GetMapping("/")
+   // @GetMapping("/login")
     public String login(Model model) {
         // message というデータを HTML 側に送る
         model.addAttribute("message", "ようこそ！ログイン機能");
-
         return "login"; // templates/login.html を表示する
     }
 
@@ -38,6 +41,7 @@ public class WorkRecordController {
     public String login(@RequestParam("username") String username, HttpSession session) {
         session.setAttribute("username", username);
         session.setAttribute("gpsResult", null);
+        System.out.println("postMapping-login");
         return "redirect:/work_submit";
     }
 

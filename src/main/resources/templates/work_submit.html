@@ -8,11 +8,11 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body class="container mt-4">
-    <h1 class="text-center">勤務管理システム</h1>
-    <h2 class="text-center">ユーザー名 : <span th:text="${username}"></span></h2>
-    <div class="carp p-4 mt-4">
-        <h3>本日の勤務記録  <span th:text="${#dates.createNow()}"></span></h3>
+<body class="container mt-3 bg-body-secondary" >
+    <h1 class="text-center my-4 display-4 fw-bold">勤務管理システム</h1>
+    <h2 class="">Username : <span th:text="${username}"></span></h2>
+    <div class="card p-4 mt-3">
+        <h3>本日の勤務記録  <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"></span></h3>
         <table class="table table-bordered table-striped text-center">
             <thead class="table-dark">
             <tr>
@@ -33,26 +33,27 @@
         </table>
 
     </div>
-    <div class="d-flex justify-content-center gap-4 mt-1">
+    <div class="d-flex justify-content-center gap-5 mt-4">
         <form action="/clockIn" method="post">
-            <button type="submit" class="btn btn-success btn-lg" th:disabled="${isTodayRecorded}">出勤</button>
+            <button type="submit" class="btn btn-success btn-lg w-100" th:disabled="${isTodayRecorded}">出勤</button>
 
         </form>
         <form th:action="${userWorkRecord.clockInTime != null}
                   ? @{/clock-out/{id}(id=${userWorkRecord.id})} : '#'" method="POST">
-            <button type="submit" class="btn btn-danger btn-lg"
+            <button type="submit" class="btn btn-danger btn-lg w-100"
                     th:disabled="${userWorkRecord.clockInTime == null or userWorkRecord.clockOutTime !=null }">退勤
             </button>
         </form>
         <form th:action="${ (userWorkRecord.clockInTime != null and isTodayRecorded)}
             ? @{/cancel/{id}(id=${userWorkRecord.id})} : '#'" method="POST">
-            <button type="submit" class="btn btn-warning btn-lg" th:disabled="${userWorkRecord.clockInTime==null}">取消
+            <button type="submit" class="btn btn-warning btn-lg w-30" th:disabled="${userWorkRecord.clockInTime == null}">取消
             </button>
+
         </form>
     </div>
     <div class="d-flex justify-content-center gap-3 mt-4">
-        <a href="/work_records" class="btn btn-info">一覧画面</a>
-        <a href="/" class="btn btn-dark">戻る</a>
+        <a href="/work_records" class="btn btn-info  btn-lg">一覧画面</a>
+        <a href="/" class="btn btn-dark w-30 btn-lg"> 戻る </a>
     </div>
 
     <p id="locationText">位置情報を取得中...</p>
@@ -60,10 +61,8 @@
     <form id="gpsForm" action="/gpsTest" method="POST">
         <input type="hidden" id="lat" name="lat">
         <input type="hidden" id="lng" name="lng">
-        <button type="button" onclick="getLocation()">GPSTEST</button>
     </form>
     <p th:if="${gpsResult != null}">位置判定：<span th:text="${gpsResult}"></span></p>
-    <a href="/work_submit" >戻る</a>
     <button type="button" onclick="initMap()">位置表示</button>
 
 
