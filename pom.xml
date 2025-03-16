@@ -97,6 +97,15 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<!-- MySQL Driver -->
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.28</version> <!-- バージョンは最新を使用 -->
+		</dependency>
+
+
 
 	</dependencies>
 
