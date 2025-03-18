@@ -6,6 +6,7 @@ import com.example.demo.service.WorkRecordService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +25,8 @@ import java.util.List;
 //いずれControllerを分割
 public class HomeController {
 
-    @Value("${MYSQLPASSWORD}")
-    private String mysqlPassword;
-    @Value("${MYSQLUSER}")
-    private String mysqlUser;
-
+    @Autowired
+    private Environment environment;
     private final WorkRecordRepository repository;
     @Autowired
     private WorkRecordService workRecordService;
@@ -39,6 +37,8 @@ public class HomeController {
       @GetMapping("/")
   //  @GetMapping("/login")
     public String login(Model model) {
+        String mysqlUser=environment.getProperty("MYSQLUSER") ;
+        String mysqlPassword = environment.getProperty("MYSQLPASSWORD");
         // message というデータを HTML 側に送る
         model.addAttribute("message", "ようこそ！ログイン機能");
         System.out.println("login/ MYSQLUSER : "+mysqlUser);
