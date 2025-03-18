@@ -5,6 +5,7 @@ import com.example.demo.repository.WorkRecordRepository;
 import com.example.demo.service.WorkRecordService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,11 @@ import java.util.List;
 //いずれControllerを分割
 public class HomeController {
 
+    @Value("${MYSQLPASSWORD}")
+    private String mysqlPassword;
+    @Value("${MYSQLUSER}")
+    private String mysqlUser;
+
     private final WorkRecordRepository repository;
     @Autowired
     private WorkRecordService workRecordService;
@@ -35,7 +41,8 @@ public class HomeController {
     public String login(Model model) {
         // message というデータを HTML 側に送る
         model.addAttribute("message", "ようこそ！ログイン機能");
-        System.out.println("getmap-login");
+        System.out.println("login/ MYSQLUSER : "+mysqlUser);
+        System.out.println("login/ MYSQLPASSWORD : "+mysqlPassword);
         return "login"; // templates/login.html を表示する
     }
 
@@ -44,7 +51,6 @@ public class HomeController {
     public String login(@RequestParam("username") String username, HttpSession session) {
         session.setAttribute("username", username);
         session.setAttribute("gpsResult", null);
-        System.out.println("postMapping-login");
         return "redirect:/work_submit";
     }
 
