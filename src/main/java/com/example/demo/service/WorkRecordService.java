@@ -2,6 +2,7 @@ package com.example.demo.service;
 import com.example.demo.model.WorkRecord;
 import com.example.demo.repository.WorkRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +24,9 @@ public class WorkRecordService {
     }
     public void deleteWorkRecord(long id){
         workRecordRepository.deleteById(id);
+    }
+    public List<WorkRecord> getUserRecordsByUsername(String username){
+        return workRecordRepository.findByUsername(username, Sort.by(Sort.Order.asc("id")) );
     }
 
 }

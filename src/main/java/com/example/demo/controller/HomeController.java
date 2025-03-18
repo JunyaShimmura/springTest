@@ -74,8 +74,6 @@ public class HomeController {
         model.addAttribute("isTodayRecorded", isTodayRecorded);
         model.addAttribute("userWorkRecord", userWorkRecord);
         model.addAttribute("gpsResult", session.getAttribute("gpsResult"));
-
-
         return "work_submit";
     }
 
@@ -89,8 +87,6 @@ public class HomeController {
         record.setUsername(username);
         record.setClockInTime(LocalDateTime.now());
         repository.save(record);
-
-
         return "redirect:/work_submit";
     }
 
@@ -116,22 +112,14 @@ public class HomeController {
     @GetMapping("/work_records")
     public String work_records(Model model, HttpSession session) {
         String username = (String) session.getAttribute("username");
-        List<WorkRecord> records = repository.findAll();//DBの全データ
-        List<WorkRecord> userWorkRecords = new ArrayList<>();//ログインユーザーのリスト
-        for (WorkRecord r : records) {
-            if (username.equals(r.getUsername())) {
-                userWorkRecords.add(r);
-            }
-        }
+        List<WorkRecord> userWorkRecords = workRecordService.getUserRecordsByUsername(username);
         model.addAttribute("username", username);
         model.addAttribute("userWorkRecords", userWorkRecords);
         return "work_records";
     }
-
-
     public boolean checkGps(double nowLat, double nowLon) {
         final int R = 6371000; // 地球の半径 (メートル)
-        double allowedDistance = 9500.0; // 許可範囲 (メートル)
+        double allowedDistance = 500.0; // 許可範囲 (メートル)
         // 会社の位置（例：東京駅） 35.681236 / 139.767125    富士見市 緯度: 35.857869 経度: 139.549208
         double companyLat = 35.857869;
         double companyLon = 139.549208;
@@ -143,8 +131,6 @@ public class HomeController {
                         Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double distance = R * c;
-        System.out.println("test : " + (distance <= allowedDistance));
-        System.out.println(distance);
         return distance <= allowedDistance;
     }
 
