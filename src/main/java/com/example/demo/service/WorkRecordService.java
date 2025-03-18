@@ -25,8 +25,8 @@ public class WorkRecordService {
     public void deleteWorkRecord(long id){
         workRecordRepository.deleteById(id);
     }
-    public List<WorkRecord> getUserRecordsByUsername(String username){
-        return workRecordRepository.findByUsername(username, Sort.by(Sort.Order.asc("id")) );
+    public List<WorkRecord> getUserRecordsByUsernameSort(String username){
+        return workRecordRepository.findByUsername(username, Sort.by(Sort.Order.asc("clockInTime")) );
     }
 
 }

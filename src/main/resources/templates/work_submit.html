@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" >
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>勤務管理</title>
+<title>勤怠報告アプリ</title>
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body class="container mt-3 bg-body-secondary" >
-    <h1 class="text-center my-4 display-4 fw-bold">勤務管理システム</h1>
-    <h2 class="">Username : <span th:text="${username}"></span></h2>
+<body class="container mt-3 bg-warning-subtle">
+    <h1 class="text-center my-4 display-4 fw-bold">勤怠報告アプリ</h1>
+    <h2 class="">Name : <span th:text="${username}"></span></h2>
     <div class="card p-4 mt-3">
-        <h3>本日の勤務記録  <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"></span></h3>
+        <h3>本日の勤務記録 <br> <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"></span></h3>
         <table class="table table-bordered table-striped text-center">
             <thead class="table-dark">
             <tr>
@@ -23,7 +23,7 @@
             </thead>
             <tbody>
             <tr>
-                <td th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" ></td>
+                <td th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"></td>
                 <td th:text="${isTodayRecorded  ?
                     #temporals.format(userWorkRecord.clockInTime, 'HH:mm') : '---' }"></td>
                 <td th:text="${userWorkRecord.clockOutTime != null ?
@@ -31,12 +31,10 @@
             </tr>
             </tbody>
         </table>
-
     </div>
     <div class="d-flex justify-content-center gap-5 mt-4">
         <form action="/clockIn" method="post">
             <button type="submit" class="btn btn-success btn-lg w-100" th:disabled="${isTodayRecorded}">出勤</button>
-
         </form>
         <form th:action="${userWorkRecord.clockInTime != null}
                   ? @{/clock-out/{id}(id=${userWorkRecord.id})} : '#'" method="POST">
@@ -46,34 +44,44 @@
         </form>
         <form th:action="${ (userWorkRecord.clockInTime != null and isTodayRecorded)}
             ? @{/cancel/{id}(id=${userWorkRecord.id})} : '#'" method="POST">
-            <button type="submit" class="btn btn-warning btn-lg w-30" th:disabled="${userWorkRecord.clockInTime == null}">取消
+            <button type="submit" class="btn btn-warning btn-lg w-30"
+                    th:disabled="${userWorkRecord.clockInTime == null}">取消
             </button>
-
         </form>
     </div>
-    <div class="d-flex justify-content-center gap-3 mt-4">
-        <a href="/work_records" class="btn btn-info  btn-lg">一覧画面</a>
-        <a href="/" class="btn btn-dark w-30 btn-lg"> 戻る </a>
+
+    <section class="mt-3 pt-3">
+
+        <p><br>勤務地を登録した場合は位置判定も記録されます。
+            <br>（記録のためであり出退勤の報告可否に影響するものではありません）</p>
+        <button type="button" onclick="initMap()" class="btn btn-outline-primary ">現在値を表示する</button>
+        <p id="locationText">...</p>
+        <div id="map" style="height: 300px; width: 100%;"></div>
+        <form id="gpsForm" action="/gpsTest" method="POST">
+            <input type="hidden" id="lat" name="lat">
+            <input type="hidden" id="lng" name="lng">
+        </form>
+    </section>
+
+    <p th:if="${gpsResult != null}">位置判定：<span th:text="${gpsResult}"></span></p>
+    <div class="d-flex justify-content-center gap-5 mt-4">
+        <a href="/work_records" class="btn btn-secondary">出退一覧</a>
+        <a href="/login" class="btn btn-dark w-30 btn-lg"> 戻 る </a>
     </div>
 
-    <p id="locationText">...</p>
-    <div id="map" style="height: 300px; width: 100%;"></div>
-    <form id="gpsForm" action="/gpsTest" method="POST">
-        <input type="hidden" id="lat" name="lat">
-        <input type="hidden" id="lng" name="lng">
-    </form>
-    <p th:if="${gpsResult != null}">位置判定：<span th:text="${gpsResult}"></span></p>
-    <button type="button" onclick="initMap()">位置表示</button>
-
     <script
-            th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${@environment.getProperty('googleMapsApiKey')}}" async defer>
-<!--            // Google Maps APIが読み込まれたらinitMap()を実行   一時的にOFF-->
-<!--     th:src="@{'https://maps.googleapis.com/maps/api/js?key='-->
-<!--    + ${@environment.getProperty('googleMapsApiKey')}-->
-<!--    + '&callback=initMap'}" async defer> -->
+            th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${@environment.getProperty('googleMapsApiKey')}}"
+            async defer>
+        <!--            // Google Maps APIが読み込まれたらinitMap()を実行   一時的にOFF-->
+        <!--     th:src="@{'https://maps.googleapis.com/maps/api/js?key='-->
+        <!--    + ${@environment.getProperty('googleMapsApiKey')}-->
+        <!--    + '&callback=initMap'}" async defer> -->
     </script>
 
     <script th:src="@{/js/map.js}" defer></script>
-
+    <!-- フッター -->
+    <footer class="mt-5 pt-4 text-center">
+        <p>&copy; 2025 勤怠報告アプリ - All Rights Reserved</p>
+    </footer>
 </body>
 </html>

@@ -25,8 +25,6 @@ import java.util.List;
 //いずれControllerを分割
 public class HomeController {
 
-    @Autowired
-    private Environment environment;
     private final WorkRecordRepository repository;
     @Autowired
     private WorkRecordService workRecordService;
@@ -34,18 +32,18 @@ public class HomeController {
         this.repository = repository;
     }
 
-      @GetMapping("/")
-  //  @GetMapping("/login")
-    public String login(Model model) {
-          String mysqlPassword = environment.getProperty("MYSQLPASSWORD");
-          String apiKey = environment.getProperty("googleMapsApiKey");
-        // message というデータを HTML 側に送る
-        model.addAttribute("message", "ようこそ！ログイン機能");
-        System.out.println("login/ MYSQLPASSWORD : "+mysqlPassword);
-        System.out.println("login/ apiKey : "+apiKey);
-        return "login"; // templates/login.html を表示する
+    @GetMapping("/")
+    public String Top(Model model) {
+
+        return "redirect:/login";
     }
 
+    @GetMapping("/login")
+    public String login(Model model) {
+        // message というデータを HTML 側に送る
+        model.addAttribute("message", "ようこそ！ログイン機能");
+        return "login"; // templates/login.html を表示する
+    }
     //sesseion にユーザー名を保存
     @PostMapping("/login")
     public String login(@RequestParam("username") String username, HttpSession session) {
@@ -53,7 +51,6 @@ public class HomeController {
         session.setAttribute("gpsResult", null);
         return "redirect:/work_submit";
     }
-
     @GetMapping("/work_submit")
     public String work_submit(HttpSession session, Model model) {
         String username = (String) session.getAttribute("username");
@@ -82,7 +79,6 @@ public class HomeController {
         model.addAttribute("gpsResult", session.getAttribute("gpsResult"));
         return "work_submit";
     }
-
     @PostMapping("/clockIn")
     public String clockIn(HttpSession session) {
         String username = (String) session.getAttribute("username");
@@ -95,7 +91,6 @@ public class HomeController {
         repository.save(record);
         return "redirect:/work_submit";
     }
-
     @PostMapping("/cancel/{id}")
     public String cancel(@PathVariable Long id) {
         WorkRecord record = repository.findById(id)
@@ -118,7 +113,7 @@ public class HomeController {
     @GetMapping("/work_records")
     public String work_records(Model model, HttpSession session) {
         String username = (String) session.getAttribute("username");
-        List<WorkRecord> userWorkRecords = workRecordService.getUserRecordsByUsername(username);
+        List<WorkRecord> userWorkRecords = workRecordService.getUserRecordsByUsernameSort(username);
         model.addAttribute("username", username);
         model.addAttribute("userWorkRecords", userWorkRecords);
         return "work_records";

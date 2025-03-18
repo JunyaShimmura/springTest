@@ -34,12 +34,12 @@ public class SecurityConfig {
                 .csrf().disable() // CSRF保護を無効化 403エラー回避
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()
-                        .anyRequest().permitAll()  // すべてのリクエストを許可
+                        .anyRequest().permitAll()  // すべてのリクエストを許可  一時的
                 )
                 .formLogin(login -> login
                         .loginPage("/login")
                         .successHandler(customAuthenticationSuccessHandler)  // ログイン成功時の処理
-                        .failureUrl("/?error=true")  // 認証失敗時のリダイレクト先
+                        .failureUrl("/login?error=true")  // 認証失敗時のリダイレクト先
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -61,15 +61,15 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         return new InMemoryUserDetailsManager(
                 User.withUsername("user1")
-                        .password(passwordEncoder().encode("password12"))  // パスワードのエンコード
+                        .password(passwordEncoder().encode("pass12word"))  // パスワードのエンコード
                         .roles("USER")
                         .build(),
                 User.withUsername("user2")
-                        .password(passwordEncoder().encode("password12"))
+                        .password(passwordEncoder().encode("pass12word"))
                         .roles("USER")
                         .build(),
                 User.withUsername("shinmura")
-                        .password(passwordEncoder().encode("password12"))
+                        .password(passwordEncoder().encode("pass12word"))
                         .roles("ADMIN")
                         .build()
         );
