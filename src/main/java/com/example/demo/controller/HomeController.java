@@ -37,12 +37,12 @@ public class HomeController {
       @GetMapping("/")
   //  @GetMapping("/login")
     public String login(Model model) {
-        String mysqlUser=environment.getProperty("MYSQLUSER") ;
-        String mysqlPassword = environment.getProperty("MYSQLPASSWORD");
+          String mysqlPassword = environment.getProperty("MYSQLPASSWORD");
+          String apiKey = environment.getProperty("googleMapsApiKey");
         // message というデータを HTML 側に送る
         model.addAttribute("message", "ようこそ！ログイン機能");
-        System.out.println("login/ MYSQLUSER : "+mysqlUser);
         System.out.println("login/ MYSQLPASSWORD : "+mysqlPassword);
+        System.out.println("login/ apiKey : "+apiKey);
         return "login"; // templates/login.html を表示する
     }
 
