@@ -17,15 +17,17 @@
             <table class="table table-bordered table-striped text-center">
                 <thead class="table-dark">
                 <tr>
+                    <th>日付</th>
                     <th>出勤記録</th>
                     <th>退勤記録</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="record : ${userWorkRecords}">
-                    <td th:text="${#temporals.format(record.clockInTime,'yyyy/MM/dd HH:mm  ' )}"></td>
+                    <td th:text="${#temporals.format(record.clockInTime,'yyyy/MM/dd' )}"></td>
+                    <td th:text="${#temporals.format(record.clockInTime,'HH:mm' )}"></td>
                     <td th:if="${record.clockOutTime != null}"
-                        th:text="${#temporals.format(record.clockOutTime,'yyyy/MM/dd HH:mm  ' )}"></td>
+                        th:text="${#temporals.format(record.clockOutTime,'HH:mm' )}"></td>
                 </tr>
                 </tbody>
             </table>

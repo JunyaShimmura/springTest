@@ -32,16 +32,23 @@ public class HomeController {
         this.repository = repository;
     }
 
+    @Value("${googleMapsApiKey}")
+    private String googleMapsApiKey ;
+
     @GetMapping("/")
     public String Top(Model model) {
 
         return "redirect:/login";
     }
+//    @GetMapping("/map")
+//    public String map(Model model) {
+//        System.out.println("/map apy:"+ googleMapsApiKey);
+//        model.addAttribute("googleMapsApiKey",googleMapsApiKey);
+//        return "map";
+//    }
 
     @GetMapping("/login")
     public String login(Model model) {
-        // message というデータを HTML 側に送る
-        model.addAttribute("message", "ようこそ！ログイン機能");
         return "login"; // templates/login.html を表示する
     }
     //sesseion にユーザー名を保存
@@ -59,8 +66,7 @@ public class HomeController {
             //return "redirect:/"; // 未ログインならログインページへ
         }
         model.addAttribute("username", username);
-        //   WorkRecord userWorkRecord = repository.findTopByUsernameAndClockOutTimeIsNullOrderByClockInTimeDesc(username);
-        //ユーザーの最新のレコードを取得　　　　　　　　 findTopByUsername  findTopByUsernameOrderById
+        //ユーザーの最新のレコードを取得　　　　　　　　
         WorkRecord userWorkRecord = repository.findTopByUsernameOrderByClockInTimeDesc(username);
         //今日のレコードがあるか判定
         boolean isTodayRecorded = false;
@@ -77,6 +83,8 @@ public class HomeController {
         model.addAttribute("isTodayRecorded", isTodayRecorded);
         model.addAttribute("userWorkRecord", userWorkRecord);
         model.addAttribute("gpsResult", session.getAttribute("gpsResult"));
+        model.addAttribute("googleMapsApiKey",googleMapsApiKey);
+
         return "work_submit";
     }
     @PostMapping("/clockIn")
