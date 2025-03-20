@@ -8,8 +8,8 @@
 
 /* 各ボタンのスタイル */
 .button-container button  {
-    width: 100px; /* ボタンの幅 */
-    height: 30px; /* ボタンの高さ */
+    width: 130px; /* ボタンの幅 */
+    height: 25px; /* ボタンの高さ */
     font-size: 16px; /* ボタンのテキストサイズ */
     border-radius: 5px; /* ボタンの角を丸く */
     cursor: pointer; /* ボタンにカーソルを合わせると手のひら型になる */
@@ -31,10 +31,10 @@
 .work_records {
     background-color: #2196F3; /* 青色 */
     display: inline-block; /* インラインブロックにしてボタンのように扱う */
-    width: 100px; /* 幅を設定 */
-    height: 30px; /* 高さを設定 */
+    width: 130px; /* 幅を設定 */
+    height: 25px; /* 高さを設定 */
     text-align: center; /* テキストを中央に配置 */
-    line-height: 30px; /* ボタン内で文字を縦方向に中央揃え */
+    line-height: 25px; /* ボタン内で文字を縦方向に中央揃え */
     font-size: 16px; /* テキストの大きさ */
     color: white; /* テキストの色 */
     border: none; /* 枠線なし */

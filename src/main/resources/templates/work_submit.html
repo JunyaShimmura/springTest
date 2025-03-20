@@ -17,7 +17,7 @@
 <!--    }</style>-->
 <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
-<body class="container mt-4 bg-warning-subtle">
+<body class="container mt-2 bg-warning-subtle">
     <h1 class="text-center my-2 display-6 fw-bold">勤怠報告アプリ</h1>
     <h3 class="">Name : <span th:text="${username}"></span></h3>
     <div class="card p-3 mt-3">
@@ -41,7 +41,8 @@
             </tbody>
         </table>
     </div>
-    <div class="button-container d-flex justify-content-center gap-5 mt-3">
+
+    <div class="button-container d-flex justify-content-center gap-3 mt-3">
         <form action="/clockIn" method="post">
             <button type="submit" class="clockIn" th:disabled="${isTodayRecorded}">出  勤</button>
         </form>
@@ -61,8 +62,8 @@
     </div>
 
     <section class="mt-3 pt-3">
-        <div id="map" style="height: 300px; width: 100%;"></div>
-        <p id="locationText">...</p>
+        <div id="map" style="height: 250px; width: 100%;"></div>
+        <p id="locationText"></p>
         <form id="gpsForm" action="/gpsTest" method="POST">
             <input type="hidden" id="lat" name="lat">
             <input type="hidden" id="lng" name="lng">
