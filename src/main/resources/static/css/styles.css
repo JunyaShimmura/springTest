@@ -45,7 +45,7 @@
 }
 
 .clockOut {
-    background-color: #f44336; /* 赤色 */
+    background-color: #df2020; /* 赤色 */
 }
 
 .cancel {
@@ -54,6 +54,6 @@
 
 /* ボタンが無効（disabled）状態のスタイル */
 .button-container button:disabled {
-    opacity: 0.4;
+    opacity: 0.3;
     cursor: not-allowed; /* カーソルを「使えません」の形に変更 */
 }
