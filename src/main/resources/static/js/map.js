@@ -22,8 +22,14 @@ function initMap() {
     } else {
         alert("位置情報を取得できません");
     }
-    document. getElementById('locationText'). textContent = 'initMap実行';
+    document. getElementById('locationText'). textContent = '位置情報取得中...';
 }
+// ページが完全に読み込まれてから地図を初期化
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof initMap === 'function') {
+        initMap();
+    }
+});
 
 function getLocation() {
     if (navigator.geolocation) {
@@ -49,30 +55,10 @@ function getLocation() {
 }
 
 
-function testDo() {
-         console.log("testDo");
-        const dynamicText = document.getElementById('dynamicText');
-            dynamicText.textContent = 'testDoが変更されました！';
-}
-function testDoOnclick() {
-         console.log("testDoOnclick");
-        const dynamicText = document.getElementById('dynamicText');
-            dynamicText.textContent = 'testDoOnclickが変更されました！';
-}
 
 // DOMが読み込まれた後にイベントリスナーを追加
 document.addEventListener("DOMContentLoaded", function() {
-    // ボタン1にイベントリスナーを追加
-//    const  button1= document.getElementById("btn_addEventListenerGetLocation");
-//    button1.addEventListener("click", getLocation);
-//
-//    // ボタン2にイベントリスナーを追加
-//    const button2 = document.getElementById("btn_addEventListenerInitMap");
-//    button2.addEventListener("click", initMap);
-//
-//    // ボタン3にイベントリスナーを追加
-//    const button3 = document.getElementById("button3");
-//    button3.addEventListener("click", button3Message);
+
 });
 
 
