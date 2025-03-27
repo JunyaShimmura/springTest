@@ -29,20 +29,32 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof initMap === 'function') {
         initMap();
     }
+     // submitTest関数をボタンにバインド
+     document.getElementById("submitButton").addEventListener("click", submitTest);
+      // getLocationをボタンにバインド
+      document.getElementById("getLocationButton").addEventListener("click", getLocation);
 });
 
-function getLocation() {
+// 位置情報を取得しフォームに設定
+function getLocation(button) {
+   // 送信設定　引数のボタンに応じたURL
+    let url = button.getAttribute("data-url")
+    let form = document.getElementById("locationForm");
+    form.action = url;
+    //位置取得
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function(position) {
+                // 位置情報をフォームに設定
                 document.getElementById("lat").value = position.coords.latitude;
-                document.getElementById("lng").value = position.coords.longitude;
-        //      document.getElementById("gpsForm").submit();
-                const  locationText = document. getElementById('locationText');
-                locationText.textContent = 'lat lng 取得';
+                document.getElementById("lon").value = position.coords.longitude;
+                 // 位置情報が取得できたら送信
+                form.submit() ;
             },
             function(error) {
                 alert("位置情報をーーー取得できませんでした: " + error.message);
+                 // 失敗してもフォームを送信
+                 form.submit();
             },
             {
             enableHighAccuracy: true, // GPS優先
@@ -51,15 +63,31 @@ function getLocation() {
         );
     } else {
         alert("このブラウザは----位置情報をサポートしていません。");
+         // 失敗してもフォームを送信
+         form.submit();
     }
+
+}
+
+function submitLocation(button){
+    getLocation();
+    let url = button.getAttribute("dataUrl")
+    let form = document.getElementById("locationForm");
+    form.action = url;
+    form.submit() ;
 }
 
 
 
-// DOMが読み込まれた後にイベントリスナーを追加
-document.addEventListener("DOMContentLoaded", function() {
 
+
+document.addEventListener("DOMContentLoaded", function() {
+    // ボタンのクリックイベントリスナーを設定
 });
+
+
+
+
 
 
 
