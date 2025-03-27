@@ -3,8 +3,8 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name="userRecord")
-public class UserRecord {
+@Table(name="users")
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

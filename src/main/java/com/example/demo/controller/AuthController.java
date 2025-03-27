@@ -1,12 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,16 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
    @Autowired
-   private UserRepository userRepository;
+   private final UserRepository userRepository = null;
 
    @Autowired
    private PasswordEncoder passwordEncoder;
 
-   @PostMapping("/register")
-   public ResponseEntity<String> register(@RequestBody User user) {
-       user.setPassword(passwordEncoder.encode(user.getPassword()));
-       user.setRole("USER");
-       userRepository.save(user);
-       return ResponseEntity.ok("ユーザー登録完了");
-   }
+//   @PostMapping("/register")
+//   public ResponseEntity<String> register(@RequestBody UserRecord userRecord) {
+//       userRecord.setPassword(passwordEncoder.encode(userRecord.getPassword()));
+//       userRecord.setRole("USER");
+//       userRepository.save(userRecord);
+//       return ResponseEntity.ok("ユーザー登録完了");
+//   }
 }
