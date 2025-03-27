@@ -34,7 +34,7 @@
         </table>
     </div>
 
-    <div class="button-container d-flex justify-content-center gap-3 mt-3">
+    <div class="button-container d-flex justify-content-center gap-2 mt-3">
         <!--位置フォーム -->
         <form id="locationForm" method="post">
             <input type="hidden" id="lat" name="lat">
@@ -77,11 +77,12 @@
     </footer>
 
     <!-- // Google Maps APIが読み込まれたらinitMap()を実行   一時的にOFF-->
-<!--    <script th:src="@{'https://maps.googleapis.com/maps/api/js?key='-->
-<!--    + ${@environment.getProperty('googleMapsApiKey')}-->
-<!--    + '&callback=initMap'}" async defer></script>-->
+    <!--    <script th:src="@{'https://maps.googleapis.com/maps/api/js?key='-->
+    <!--    + ${@environment.getProperty('googleMapsApiKey')}-->
+    <!--    + '&callback=initMap'}" async defer></script>-->
     <!--ボタン押下で表示-->
-    <script th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${@environment.getProperty('googleMapsApiKey')}}" async defer> </script>
+    <script th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${@environment.getProperty('googleMapsApiKey')}}"
+            async defer></script>
     <script th:src="@{/js/map.js}" defer></script>
 </body>
 </html>
