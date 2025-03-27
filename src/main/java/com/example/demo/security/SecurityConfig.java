@@ -68,6 +68,10 @@ public class SecurityConfig {
                         .password(passwordEncoder().encode("pass12word"))
                         .roles("USER")
                         .build(),
+                User.withUsername("user3")
+                        .password(passwordEncoder().encode("pass12word"))
+                        .roles("USER")
+                        .build(),
                 User.withUsername("shinmura")
                         .password(passwordEncoder().encode("pass12word"))
                         .roles("ADMIN")
