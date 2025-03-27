@@ -104,11 +104,12 @@ public class HomeController {
     }
     //出退勤記録取消(対象の出退勤記録のID)
     @PostMapping("/cancel/{id}")
-    public String cancel(@PathVariable Long id) {
+    public String cancel(@PathVariable Long id, HttpSession session) {
         WorkRecord record = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
         //DBから出退勤記録取消
         repository.delete(record);
+        session.setAttribute("gpsResult", false);
         return "redirect:/work_submit";
     }
     //退勤登録（出退勤記録ID、セッション、現在の緯度経度）
