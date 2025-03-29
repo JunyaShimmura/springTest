@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
-<body class="container mt-2 bg-warning-subtle">
+<body class="container mt-2 bg-warning-subtle"  data-just-login="${justLogin}" >
     <h1 class="text-center my-2 display-6 fw-bold">勤怠報告アプリ</h1>
     <h3 class="">Name : <span th:text="${username}"></span></h3>
     <div class="card p-3 mt-3">
@@ -61,7 +61,7 @@
     </div>
     <section class="mt-3 pt-3">
         <p>勤務地：<span th:text="${workPlace}"></span></p>
-        <p th:if="${gpsResult}">位置判定：確認済</p>
+        <p th:if="${gpsResult}" class="red-text">位置判定 : 勤務地にいることが確認できました。</p>
         <div id="map" style="height: 250px; width: 100%;"></div>
         <p id="locationText"></p>
         <button type="button" onclick="initMap()" class="btn btn-outline-primary ">現在値表示</button>
@@ -76,13 +76,14 @@
         <p>&copy; 2025 勤怠報告アプリ - All Rights Reserved</p>
     </footer>
 
-    <!-- // Google Maps APIが読み込まれたらinitMap()を実行   一時的にOFF-->
+    <!-- // callbackでページ表示時にinitMap()を実行   一時的にOFF-->
     <!--    <script th:src="@{'https://maps.googleapis.com/maps/api/js?key='-->
     <!--    + ${@environment.getProperty('googleMapsApiKey')}-->
     <!--    + '&callback=initMap'}" async defer></script>-->
     <!--ボタン押下で表示-->
     <script th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${@environment.getProperty('googleMapsApiKey')}}"
             async defer></script>
+
     <script th:src="@{/js/map.js}" defer></script>
 </body>
 </html>

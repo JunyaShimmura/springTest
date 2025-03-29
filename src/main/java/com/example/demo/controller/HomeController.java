@@ -5,6 +5,7 @@ import com.example.demo.model.WorkRecord;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WorkRecordRepository;
 import com.example.demo.service.WorkRecordService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,14 +45,10 @@ public class HomeController {
     public String login(Model model) {
         return "login"; // templates/login.html を表示する
     }
-    //ログイン処理
-    @PostMapping("/login")
-    public String login(@RequestParam("username") String username, HttpSession session) {
-        //sesseion にユーザー名を保存、位置判定flgを初期化
-        session.setAttribute("username", username);
-        session.setAttribute("gpsResult", false);
-        return "redirect:/work_submit";
-    }
+
+//    ログイン処理
+//    @PostMapping("/login")>>security\CustomAuthenticationSuccessHandlerで処理しredirect:
+
     //出退勤登録画面
     @GetMapping("/work_submit")
     public String work_submit(HttpSession session, Model model) {
@@ -76,12 +73,18 @@ public class HomeController {
         if (!isTodayRecorded) {
             userWorkRecord.setClockOutTime(null);
         }
+        System.out.println("WorkSubmit時 session ID: " + session.getId());  // 🔹 セッションID確認
+        System.out.println("getmap/workSubmit#gpsResult:"+session.getAttribute("gpsResult"));
+        System.out.println("getmap/workSubmit#justLogin:"+session.getAttribute("justLogin"));
         model.addAttribute("isTodayRecorded", isTodayRecorded);
         model.addAttribute("userWorkRecord", userWorkRecord);
         model.addAttribute("workPlace", workPlace);
         model.addAttribute("gpsResult", session.getAttribute("gpsResult"));
         model.addAttribute("googleMapsApiKey", googleMapsApiKey);
 
+        model.addAttribute("justLogin",session.getAttribute("justLogin"));
+        //justLoginをhtmlに渡してから削除
+        session.removeAttribute("justLogin");
         return "work_submit";
     }
     //出勤登録　（セッション、現在値の緯度経度）
@@ -163,6 +166,7 @@ public class HomeController {
         System.out.println("distance :" + distance);
         //現在地と勤務地の距離と許可範囲の比較結果を返す
         return distance <= allowedDistance;
+        //return true; //一時的にTRUE
     }
 
 }

@@ -23,16 +23,28 @@ function initMap() {
         alert("位置情報を取得できません");
     }
     document. getElementById('locationText'). textContent = '位置情報取得中...';
+    {
+//                enableHighAccuracy: false,  // 高精度OFF（速くする）
+//                timeout: 15000,              // 15秒でタイムアウト
+//                maximumAge: 60000           // 1分以内ならキャッシュ利用
+            }
 }
-// ページが完全に読み込まれてから地図を初期化
 document.addEventListener('DOMContentLoaded', function() {
-    if (typeof initMap === 'function') {
+      // ページが完全に読み込まれてから地図を初期化　表示
+//    if (typeof initMap === 'function') {
+//        initMap();
+//    }
+    const body = document.body;
+    const justLogin = body.dataset.justLogin;  // data-just-login の値を取得
+    //let justLogin = document.body.getAttribute("data-just-login") === "true";
+     if (justLogin) {
         initMap();
-    }
+     }
+      console.log("justLoginの値: ", justLogin); // デバッグ用（値を確認）
      // submitTest関数をボタンにバインド
      document.getElementById("submitButton").addEventListener("click", submitTest);
-      // getLocationをボタンにバインド
-      document.getElementById("getLocationButton").addEventListener("click", getLocation);
+     // getLocationをボタンにバインド
+     document.getElementById("getLocationButton").addEventListener("click", getLocation);
 });
 
 // 位置情報を取得しフォームに設定
