@@ -16,16 +16,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
-import com.example.demo.security.CustomUserDetailsService;
-
-
 import java.util.List;
 
 @Configuration
 public class SecurityConfig {
-
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
-    //private final  CustomUserDetailsService customUserDetailsService;
     public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler ) {
         this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
     }
