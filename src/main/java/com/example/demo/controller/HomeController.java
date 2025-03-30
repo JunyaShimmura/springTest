@@ -28,6 +28,7 @@ public class HomeController {
     private final UserRepository userRepository;
     @Autowired
     private WorkRecordService workRecordService;
+
     public HomeController(WorkRecordRepository repository, UserRepository userRepository) {
         this.repository = repository;
         this.userRepository = userRepository;
@@ -35,19 +36,21 @@ public class HomeController {
 
     @Value("${googleMapsApiKey}")
     private String googleMapsApiKey;
+
     //初期設定はログイン画面へ遷移
     @GetMapping("/")
     public String Top(Model model) {
         return "redirect:/login";
     }
+
     //ログイン画面
     @GetMapping("/login")
     public String login(Model model) {
         return "login"; // templates/login.html を表示する
     }
 
-//    ログイン処理
-//    @PostMapping("/login")>>security\CustomAuthenticationSuccessHandlerで処理しredirect:
+    //@PostMapping("/login")
+    //ログイン処理 >>security\CustomAuthenticationSuccessHandlerで処理しredirect:
 
     //出退勤登録画面
     @GetMapping("/work_submit")
@@ -74,24 +77,27 @@ public class HomeController {
             userWorkRecord.setClockOutTime(null);
         }
         System.out.println("WorkSubmit時 session ID: " + session.getId());  // 🔹 セッションID確認
-        System.out.println("getmap/workSubmit#gpsResult:"+session.getAttribute("gpsResult"));
-        System.out.println("getmap/workSubmit#justLogin:"+session.getAttribute("justLogin"));
+        System.out.println("getmap/workSubmit#gpsResult:" + session.getAttribute("gpsResult"));
+        System.out.println("getmap/workSubmit#justLogin:" + session.getAttribute("justLogin"));
         model.addAttribute("isTodayRecorded", isTodayRecorded);
         model.addAttribute("userWorkRecord", userWorkRecord);
         model.addAttribute("workPlace", workPlace);
         model.addAttribute("gpsResult", session.getAttribute("gpsResult"));
         model.addAttribute("googleMapsApiKey", googleMapsApiKey);
 
-        model.addAttribute("justLogin",session.getAttribute("justLogin"));
+        model.addAttribute("justLogin", session.getAttribute("justLogin"));
         //justLoginをhtmlに渡してから削除
         session.removeAttribute("justLogin");
         return "work_submit";
     }
+
     //出勤登録　（セッション、現在値の緯度経度）
     @PostMapping("/clockIn")
     public String clockIn(HttpSession session, @RequestParam(defaultValue = "0.0") double lat, @RequestParam(defaultValue = "0.0") double lon) {
         String userName = (String) session.getAttribute("username");
-        if (userName == null) {return "redirect:/";}
+        if (userName == null) {
+            return "redirect:/";
+        }
         System.out.println("/clockin 取得lat： :" + lat);
         //位置判定処理（引数の緯度経度とユーザー名）
         boolean gpsResult = checkGps(lat, lon, userName);
@@ -105,6 +111,7 @@ public class HomeController {
         repository.save(record);
         return "redirect:/work_submit";
     }
+
     //出退勤記録取消(対象の出退勤記録のID)
     @PostMapping("/cancel/{id}")
     public String cancel(@PathVariable Long id, HttpSession session) {
@@ -115,6 +122,7 @@ public class HomeController {
         session.setAttribute("gpsResult", false);
         return "redirect:/work_submit";
     }
+
     //退勤登録（出退勤記録ID、セッション、現在の緯度経度）
     @PostMapping("/clock-out/{id}")
     public String clockOut(@PathVariable Long id, HttpSession session, @RequestParam(defaultValue = "0.0") double lat, @RequestParam(defaultValue = "0.0") double lon) {
@@ -133,6 +141,7 @@ public class HomeController {
         }
         return "redirect:/work_submit";
     }
+
     //勤怠記録一覧画面
     @GetMapping("/work_records")
     public String work_records(Model model, HttpSession session) {
@@ -157,7 +166,6 @@ public class HomeController {
         double dLon = Math.toRadians(companyLon - nowLon);
         // ハーサイン距離の計算
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                //  Math.cos(Math.toRadians(nowLat)) * Math.cos(Math.toRadians(nowLon)) *
                 Math.cos(Math.toRadians(nowLat)) * Math.cos(Math.toRadians(companyLat)) *
                         Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -166,7 +174,6 @@ public class HomeController {
         System.out.println("distance :" + distance);
         //現在地と勤務地の距離と許可範囲の比較結果を返す
         return distance <= allowedDistance;
-        //return true; //一時的にTRUE
     }
 
 }

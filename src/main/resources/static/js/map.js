@@ -23,26 +23,23 @@ function initMap() {
         alert("位置情報を取得できません");
     }
     document. getElementById('locationText'). textContent = '位置情報取得中...';
-    {
-//                enableHighAccuracy: false,  // 高精度OFF（速くする）
+    console.log("位置表示処理を実行！");
+//    {           enableHighAccuracy: false,  // 高精度OFF（速くする）
 //                timeout: 15000,              // 15秒でタイムアウト
-//                maximumAge: 60000           // 1分以内ならキャッシュ利用
-            }
+//                maximumAge: 60000     }      // 1分以内ならキャッシュ利用　　
 }
+// ボタンのクリックイベントリスナーを設定
 document.addEventListener('DOMContentLoaded', function() {
       // ページが完全に読み込まれてから地図を初期化　表示
 //    if (typeof initMap === 'function') {
 //        initMap();
 //    }
-    const body = document.body;
-    const justLogin = body.dataset.justLogin;  // data-just-login の値を取得
-    //let justLogin = document.body.getAttribute("data-just-login") === "true";
+    // justLogin ログイン直後の時　initMap()実行
+    let justLogin =  document.body.dataset.justLogin;  // data-just-login の値を取得
+    console.log("justLoginの値:", justLogin);
      if (justLogin) {
         initMap();
      }
-      console.log("justLoginの値: ", justLogin); // デバッグ用（値を確認）
-     // submitTest関数をボタンにバインド
-     document.getElementById("submitButton").addEventListener("click", submitTest);
      // getLocationをボタンにバインド
      document.getElementById("getLocationButton").addEventListener("click", getLocation);
 });
@@ -88,10 +85,6 @@ function submitLocation(button){
     form.action = url;
     form.submit() ;
 }
-
-
-
-
 
 document.addEventListener("DOMContentLoaded", function() {
     // ボタンのクリックイベントリスナーを設定

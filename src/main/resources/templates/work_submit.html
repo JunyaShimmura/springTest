@@ -9,7 +9,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
-<body class="container mt-2 bg-warning-subtle"  data-just-login="${justLogin}" >
+<!-- data-just-login="${justLogin} を.jsに渡す-->
+<body class="container mt-3 bg-warning-subtle" th:data-just-login="${justLogin}">
     <h1 class="text-center my-2 display-6 fw-bold">勤怠報告アプリ</h1>
     <h3 class="">Name : <span th:text="${username}"></span></h3>
     <div class="card p-3 mt-3">
@@ -42,12 +43,15 @@
             <!--出勤ボタン　本日の記録があったら非活性-->
             <button type="button" class="clockIn" th:disabled="${isTodayRecorded}"
                     onclick="getLocation(this)"
-                    data-url="/clockIn">出勤</button>
+                    data-url="/clockIn">出勤
+            </button>
             <!--退勤ボタン　本日の記録がないか、退勤記録があったら非活性-->
-            <button type="button" class="clockOut" th:disabled="${! isTodayRecorded or userWorkRecord.clockOutTime !=null }"
+            <button type="button" class="clockOut"
+                    th:disabled="${! isTodayRecorded or userWorkRecord.clockOutTime !=null }"
                     th:data-url="${userWorkRecord.clockInTime != null}
                     ? @{/clock-out/{id}(id=${userWorkRecord.id})} : '#'"
-                    onclick="getLocation(this)" >退勤</button>
+                    onclick="getLocation(this)">退勤
+            </button>
         </form>
         <!--本日の記録がなかったら非活性-->
         <form th:action="${ (userWorkRecord.clockInTime != null and isTodayRecorded)}
@@ -72,18 +76,13 @@
         <a href="/login" class="btn btn-secondary" style="width:150px; height:40px;"> 戻 る </a>
     </div>
     <!-- フッター -->
-    <footer class="mt-5 pt-4 text-center">
+    <footer class="mt-3 pt-3 text-center">
         <p>&copy; 2025 勤怠報告アプリ - All Rights Reserved</p>
     </footer>
-
-    <!-- // callbackでページ表示時にinitMap()を実行   一時的にOFF-->
-    <!--    <script th:src="@{'https://maps.googleapis.com/maps/api/js?key='-->
-    <!--    + ${@environment.getProperty('googleMapsApiKey')}-->
-    <!--    + '&callback=initMap'}" async defer></script>-->
+    <!-- '&callback=initMap'でページ表示時に実行 一時的にOFF-->
     <!--ボタン押下で表示-->
     <script th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${@environment.getProperty('googleMapsApiKey')}}"
             async defer></script>
-
     <script th:src="@{/js/map.js}" defer></script>
 </body>
 </html>
