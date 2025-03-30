@@ -16,6 +16,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import com.example.demo.security.CustomUserDetailsService;
+
 
 import java.util.List;
 
@@ -23,10 +25,9 @@ import java.util.List;
 public class SecurityConfig {
 
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
-    private final  CustomUserDetailsService customUserDetailsService;
-    public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler ,CustomUserDetailsService customUserDetailsService) {
+    //private final  CustomUserDetailsService customUserDetailsService;
+    public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler ) {
         this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
-        this.customUserDetailsService = customUserDetailsService;
     }
 
     @Bean
