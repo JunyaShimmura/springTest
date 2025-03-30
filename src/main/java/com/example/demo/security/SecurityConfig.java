@@ -1,5 +1,9 @@
 package com.example.demo.security;
 
+import com.example.demo.repository.UserRepository;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,26 +11,29 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
+import java.util.List;
+
 @Configuration
 public class SecurityConfig {
 
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
-
-    public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) {
+    private final  CustomUserDetailsService customUserDetailsService;
+    public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler ,CustomUserDetailsService customUserDetailsService) {
         this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();  // BCryptを使ったPasswordEncoderを返す
     }
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,6 +42,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().permitAll()  // すべてのリクエストを許可  一時的
+                        // その他のリクエストに対しては認証が必要
+                        //.anyRequest().authenticated()  // それ以外のリクエストには認証を求める
                 )
                 .formLogin(login -> login
                         .loginPage("/login")
@@ -57,25 +66,39 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager(
-                User.withUsername("user1")
-                        .password(passwordEncoder().encode("pass12word"))  // パスワードのエンコード
-                        .roles("USER")
-                        .build(),
-                User.withUsername("user2")
-                        .password(passwordEncoder().encode("pass12word"))
-                        .roles("USER")
-                        .build(),
-                User.withUsername("user3")
-                        .password(passwordEncoder().encode("pass12word"))
-                        .roles("USER")
-                        .build(),
-                User.withUsername("shinmura")
-                        .password(passwordEncoder().encode("pass12word"))
-                        .roles("ADMIN")
-                        .build()
-        );
-    }
+    // AuthenticationManager の設定
+//    @Bean
+//    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+//        // AuthenticationManagerBuilder を使って、ユーザー詳細情報サービスとパスワードエンコーダーを設定
+//        AuthenticationManagerBuilder authenticationManagerBuilder =
+//                http.getSharedObject(AuthenticationManagerBuilder.class);
+//        authenticationManagerBuilder
+//                .userDetailsService(customUserDetailsService)  // CustomUserDetailsService を指定
+//                .passwordEncoder(passwordEncoder());  // PasswordEncoder を指定
+//
+//        return authenticationManagerBuilder.build();
+//    }
+
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//
+//        return new InMemoryUserDetailsManager(
+//                User.withUsername("user1")
+//                        .password(passwordEncoder().encode("pass12word"))
+//                        .roles("USER")
+//                        .build(),
+//                User.withUsername("user2")
+//                        .password(passwordEncoder().encode("pass12word"))
+//                        .roles("USER")
+//                        .build(),
+//                User.withUsername("user3")
+//                        .password(passwordEncoder().encode("pass12word"))
+//                        .roles("USER")
+//                        .build(),
+//                User.withUsername("shinmura")
+//                        .password(passwordEncoder().encode("pass12word"))
+//                        .roles("ADMIN")
+//                        .build()
+//        );
+//    }
 }

@@ -1,11 +1,10 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.User;
+import com.example.demo.model.UserEntity;
 import com.example.demo.model.WorkRecord;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WorkRecordRepository;
 import com.example.demo.service.WorkRecordService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 //@RequestMapping("/work")
@@ -56,8 +56,8 @@ public class HomeController {
     @GetMapping("/work_submit")
     public String work_submit(HttpSession session, Model model) {
         String username = (String) session.getAttribute("username");
-        User user = userRepository.findByUsername(username);
-        String workPlace = user.getWorkPlace();
+        Optional<UserEntity> userEntity = userRepository.findByUsername(username);
+        String workPlace = userEntity.get().getWorkPlace();
         if (username == null) {
             return "redirect:/"; // 未ログインならログインページへ
         }
@@ -76,7 +76,6 @@ public class HomeController {
         if (!isTodayRecorded) {
             userWorkRecord.setClockOutTime(null);
         }
-        System.out.println("WorkSubmit時 session ID: " + session.getId());  // 🔹 セッションID確認
         System.out.println("getmap/workSubmit#gpsResult:" + session.getAttribute("gpsResult"));
         System.out.println("getmap/workSubmit#justLogin:" + session.getAttribute("justLogin"));
         model.addAttribute("isTodayRecorded", isTodayRecorded);
@@ -98,7 +97,6 @@ public class HomeController {
         if (userName == null) {
             return "redirect:/";
         }
-        System.out.println("/clockin 取得lat： :" + lat);
         //位置判定処理（引数の緯度経度とユーザー名）
         boolean gpsResult = checkGps(lat, lon, userName);
         System.out.println("/clockin位置判定： :" + gpsResult);
@@ -127,7 +125,7 @@ public class HomeController {
     @PostMapping("/clock-out/{id}")
     public String clockOut(@PathVariable Long id, HttpSession session, @RequestParam(defaultValue = "0.0") double lat, @RequestParam(defaultValue = "0.0") double lon) {
         String userName = (String) session.getAttribute("username");
-        User user = userRepository.findByUsername(userName);
+        Optional<UserEntity> userEntity = userRepository.findByUsername(userName);
         WorkRecord record = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
         if (record != null) {
@@ -157,9 +155,9 @@ public class HomeController {
         final int R = 6371000; // 地球の半径 (メートル)
         double allowedDistance = 1000.0; // 許可範囲 (メートル)
         // ユーザー名からテーブルにあるユーザー情報を取得
-        User user = userRepository.findByUsername(userName);
-        double companyLat = user.getCompanyLat();
-        double companyLon = user.getCompanyLon();
+        Optional<UserEntity> userEntity = userRepository.findByUsername(userName);
+        double companyLat = userEntity.get().getCompanyLat();
+        double companyLon = userEntity.get().getCompanyLon();
         System.out.println(userName + "のcompanyLat :" + companyLat);
         // 緯度、経度の差をラジアンに変換
         double dLat = Math.toRadians(companyLat - nowLat);
