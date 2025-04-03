@@ -82,11 +82,13 @@ public class HomeController {
         model.addAttribute("userWorkRecord", userWorkRecord);
         model.addAttribute("workPlace", workPlace);
         model.addAttribute("gpsResult", session.getAttribute("gpsResult"));
+        model.addAttribute("recordMg",session.getAttribute("recordMg"));
         model.addAttribute("googleMapsApiKey", googleMapsApiKey);
 
         model.addAttribute("justLogin", session.getAttribute("justLogin"));
         //justLoginをhtmlに渡してから削除
         session.removeAttribute("justLogin");
+        session.removeAttribute("recordMg");
         return "work_submit";
     }
 
@@ -107,6 +109,7 @@ public class HomeController {
         record.setClockInTime(LocalDateTime.now());
         record.setClockInJudge(gpsResult);
         repository.save(record);
+        session.setAttribute("recordMg","出勤記録を登録しました。");
         return "redirect:/work_submit";
     }
 
@@ -118,6 +121,7 @@ public class HomeController {
         //DBから出退勤記録取消
         repository.delete(record);
         session.setAttribute("gpsResult", false);
+        session.setAttribute("recordMg","出退勤記録を取消しました。");
         return "redirect:/work_submit";
     }
 
@@ -136,6 +140,7 @@ public class HomeController {
             session.setAttribute("gpsResult", gpsResult);
             record.setClockOutTime((LocalDateTime.now()));
             repository.save(record);
+            session.setAttribute("recordMg","退勤記録を登録しました。");
         }
         return "redirect:/work_submit";
     }
