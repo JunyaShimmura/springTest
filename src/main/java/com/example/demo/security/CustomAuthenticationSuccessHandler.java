@@ -14,21 +14,17 @@ import java.io.IOException;
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
 
+    // 認証成功後の処理
     @Override
     public void onAuthenticationSuccess(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Authentication authentication) throws IOException, jakarta.servlet.ServletException {
-        // 認証成功後にセッションに情報を保存
-
-        // 既存のセッションを無効化し、新しいセッションを発行
+        // 既存のセッションを無効化し、新しいセッションを発行 （セッションの初期化）
         request.getSession().invalidate();
         // 新しいセッションを作成（Spring Bootが自動で生成する）
         HttpSession session = request.getSession(true);
-        session.setAttribute("username", authentication.getName());  // ログインユーザーの名前をセッションに格納
-        session.setAttribute("gpsResult", false);
-        session.setAttribute("justLogin",true);
-        System.out.println("認証後Login時 session ID: " + session.getId());  // 🔹 セッションID確認
-
+        session.setAttribute("username", authentication.getName());  // ログインユーザーの名前を保存
+        session.setAttribute("gpsResult", false); //gpsResult初期化
+        session.setAttribute("justLogin",true);//ログイン認証後flg
         // ログイン後に遷移する先
         response.sendRedirect("/work_submit");
-
     }
 }

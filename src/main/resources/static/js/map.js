@@ -18,7 +18,7 @@ function initMap() {
                     map: map,
                     title: "現在地"
                 });
-            }, 10)
+            }, 100)
         });
     } else {
         alert("位置情報を取得できません");

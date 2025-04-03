@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().permitAll()  // すべてのリクエストを許可  一時的
-                        // その他のリクエストに対しては認証が必要
+                        // ↓その他のリクエストに対しては認証が必要　＞＞認証から先の画面にいけなくなった
                         //.anyRequest().authenticated()  // それ以外のリクエストには認証を求める
                 )
                 .formLogin(login -> login
@@ -62,7 +62,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // AuthenticationManager の設定
+    // AuthenticationManager の設定　　ログイン認証roles処理
 //    @Bean
 //    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
 //        // AuthenticationManagerBuilder を使って、ユーザー詳細情報サービスとパスワードエンコーダーを設定
@@ -75,26 +75,4 @@ public class SecurityConfig {
 //        return authenticationManagerBuilder.build();
 //    }
 
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//
-//        return new InMemoryUserDetailsManager(
-//                User.withUsername("user1")
-//                        .password(passwordEncoder().encode("pass12word"))
-//                        .roles("USER")
-//                        .build(),
-//                User.withUsername("user2")
-//                        .password(passwordEncoder().encode("pass12word"))
-//                        .roles("USER")
-//                        .build(),
-//                User.withUsername("user3")
-//                        .password(passwordEncoder().encode("pass12word"))
-//                        .roles("USER")
-//                        .build(),
-//                User.withUsername("shinmura")
-//                        .password(passwordEncoder().encode("pass12word"))
-//                        .roles("ADMIN")
-//                        .build()
-//        );
-//    }
 }

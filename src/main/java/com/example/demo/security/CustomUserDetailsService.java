@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
-
+// ログイン認証　DBにあるusersを取得し比較
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 

@@ -110,7 +110,7 @@ public class HomeController {
         return "redirect:/work_submit";
     }
 
-    //出退勤記録取消(対象の出退勤記録のID)
+    //出退勤記録取消(対象の出退勤記録のID、セッション)
     @PostMapping("/cancel/{id}")
     public String cancel(@PathVariable Long id, HttpSession session) {
         WorkRecord record = repository.findById(id)
@@ -143,8 +143,10 @@ public class HomeController {
     //勤怠記録一覧画面
     @GetMapping("/work_records")
     public String work_records(Model model, HttpSession session) {
+        //usernameの全ての勤怠記録を取得
         String username = (String) session.getAttribute("username");
         List<WorkRecord> userWorkRecords = workRecordService.getUserRecordsByUsernameSort(username);
+
         model.addAttribute("username", username);
         model.addAttribute("userWorkRecords", userWorkRecords);
         return "work_records";
