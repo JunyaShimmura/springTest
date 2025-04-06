@@ -27,11 +27,12 @@ public class HomeController {
     private final WorkRecordRepository repository;
     private final UserRepository userRepository;
     @Autowired
-    private WorkRecordService workRecordService;
+    private  final WorkRecordService workRecordService;
 
-    public HomeController(WorkRecordRepository repository, UserRepository userRepository) {
+    public HomeController(WorkRecordRepository repository, UserRepository userRepository,WorkRecordService workRecordService) {
         this.repository = repository;
         this.userRepository = userRepository;
+        this.workRecordService = workRecordService;
     }
 
     @Value("${googleMapsApiKey}")
@@ -77,7 +78,6 @@ public class HomeController {
             userWorkRecord.setClockOutTime(null);
         }
         System.out.println("getmap/workSubmit#gpsResult:" + session.getAttribute("gpsResult"));
-        System.out.println("getmap/workSubmit#justLogin:" + session.getAttribute("justLogin"));
         model.addAttribute("isTodayRecorded", isTodayRecorded);
         model.addAttribute("userWorkRecord", userWorkRecord);
         model.addAttribute("workPlace", workPlace);
@@ -100,8 +100,7 @@ public class HomeController {
             return "redirect:/";
         }
         //位置判定処理（引数の緯度経度とユーザー名）
-        boolean gpsResult = checkGps(lat, lon, userName);
-        System.out.println("/clockin位置判定： :" + gpsResult);
+        boolean gpsResult = workRecordService.checkGps(lat, lon, userName);
         session.setAttribute("gpsResult", gpsResult);
         //DBへ出勤記録を登録
         WorkRecord record = new WorkRecord();
@@ -134,7 +133,7 @@ public class HomeController {
                 .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
         if (record != null) {
             //位置判定処理（緯度経度、ユーザー名）
-            boolean gpsResult = checkGps(lat, lon, userName);
+            boolean gpsResult = workRecordService.checkGps(lat, lon, userName);
             record.setClockOutJudge(gpsResult);
             //退勤記録をDBへ登録
             session.setAttribute("gpsResult", gpsResult);
@@ -155,30 +154,6 @@ public class HomeController {
         model.addAttribute("username", username);
         model.addAttribute("userWorkRecords", userWorkRecords);
         return "work_records";
-    }
-
-    //位置判定処理　（現在地の緯度、経度、ユーザー名）
-    public boolean checkGps(Double nowLat, Double nowLon, String userName) {
-        final int R = 6371000; // 地球の半径 (メートル)
-        double allowedDistance = 1000.0; // 許可範囲 (メートル)
-        // ユーザー名からテーブルにあるユーザー情報を取得
-        Optional<UserEntity> userEntity = userRepository.findByUsername(userName);
-        double companyLat = userEntity.get().getCompanyLat();
-        double companyLon = userEntity.get().getCompanyLon();
-        System.out.println(userName + "のcompanyLat :" + companyLat);
-        // 緯度、経度の差をラジアンに変換
-        double dLat = Math.toRadians(companyLat - nowLat);
-        double dLon = Math.toRadians(companyLon - nowLon);
-        // ハーサイン距離の計算
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(Math.toRadians(nowLat)) * Math.cos(Math.toRadians(companyLat)) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        //　現在地と登録勤務地の距離
-        double distance = R * c;
-        System.out.println("distance :" + distance);
-        //現在地と勤務地の距離と許可範囲の比較結果を返す
-        return distance <= allowedDistance;
     }
 
 }

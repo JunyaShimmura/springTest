@@ -43,7 +43,7 @@
             <input type="hidden" id="lon" name="lon">
             <!--出勤ボタン　本日の記録があったら非活性-->
             <button type="button" class="clockIn" th:disabled="${isTodayRecorded}"
-                    onclick="getLocation(this)"
+                    onclick="submitLocation(this)"
                     data-url="/clockIn">出勤
             </button>
             <!--退勤ボタン　本日の記録がないか、退勤記録があったら非活性-->
@@ -51,7 +51,7 @@
                     th:disabled="${! isTodayRecorded or userWorkRecord.clockOutTime !=null }"
                     th:data-url="${userWorkRecord.clockInTime != null}
                     ? @{/clock-out/{id}(id=${userWorkRecord.id})} : '#'"
-                    onclick="getLocation(this)">退勤
+                    onclick="submitLocation(this)">退勤
             </button>
         </form>
         <!--本日の記録がなかったら非活性-->
@@ -69,7 +69,7 @@
         <p th:if="${gpsResult}" class="text-success">位置判定 : 勤務地にいることが確認できました。</p>
         <div id="map" style="height: 250px; width: 100%;"></div>
         <p id="locationText"></p>
-        <button type="button" onclick="initMap()" class="btn btn-outline-primary ">現在値表示</button>
+        <button type="button" onclick="displayMap()" class="btn btn-outline-primary ">現在値表示</button>
         <p><br>勤務地を登録した場合は位置判定も記録されますが、出退勤の報告可否に影響するものではありません</p>
     </section>
 
@@ -85,5 +85,6 @@
     <script th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${@environment.getProperty('googleMapsApiKey')}}"
             async defer></script>
     <script th:src="@{/js/map.js}" defer></script>
+
 </body>
 </html>
