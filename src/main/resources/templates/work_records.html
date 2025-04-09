@@ -10,6 +10,7 @@
 <body class="container mt-4 bg-warning-subtle">
     <h1 class="text-center">勤怠報告アプリ</h1>
     <h2>Name : <span th:text="${username}"></span></h2>
+    <p class="mb-4" th:if="${isAdmin}">管理者機能</p>
     <div class="card p-4 mt-2">
 
         <h3 class="mb-4">勤務記録一覧</h3>
@@ -23,11 +24,12 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="record : ${userWorkRecords}">
-                    <td th:text="${#temporals.format(record.clockInTime,'yyyy/MM/dd' )}"></td>
-                    <td th:text="${#temporals.format(record.clockInTime,'HH:mm' )}"></td>
-                    <td th:if="${record.clockOutTime != null}"
-                        th:text="${#temporals.format(record.clockOutTime,'HH:mm' )}"></td>
+<!--                <tr th:each="record : ${userWorkRecords}">-->
+                <tr th:each="record : ${userWorkRecords}" th:if="${#temporals.format(record.clockInTime, 'MM') == '04'}">
+                        <td th:text="${#temporals.format(record.clockInTime,'yyyy/MM/dd' )}"></td>
+                        <td th:text="${#temporals.format(record.clockInTime,'HH:mm' )}"></td>
+                        <td th:if="${record.clockOutTime != null}"
+                            th:text="${#temporals.format(record.clockOutTime,'HH:mm' )}"></td>
                 </tr>
                 </tbody>
             </table>

@@ -34,12 +34,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable() // CSRF保護を無効化 403エラー回避
+        //        .csrf().disable() // CSRF保護を無効化 本番ではコメントアウトにし無効化にはしない
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()
-                        .anyRequest().permitAll()  // すべてのリクエストを許可  一時的
+                     //   .requestMatchers("/admin/**").hasRole("ADMIN")
                         // ↓その他のリクエストに対しては認証が必要　＞＞認証から先の画面にいけなくなった
-                        //.anyRequest().authenticated()  // それ以外のリクエストには認証を求める
+                        .anyRequest().authenticated()  // それ以外のリクエストには認証を求める
+                        //.anyRequest().permitAll()  // すべてのリクエストを許可  一時的
                 )
                 .formLogin(login -> login
                         .loginPage("/login")
@@ -54,6 +55,7 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)  // 必要に応じてセッションを作成
+                        .sessionFixation().newSession()  // ログイン後にセッションIDを変更
                         .invalidSessionUrl("/login?invalid-session")  // セッションが無効の場合の遷移先
                         .maximumSessions(1)  // 同時セッション数を1に制限
                         .expiredUrl("/login?expired")  // セッション期限切れ時の遷移先

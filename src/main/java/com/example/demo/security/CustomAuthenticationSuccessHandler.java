@@ -18,7 +18,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     @Override
     public void onAuthenticationSuccess(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Authentication authentication) throws IOException, jakarta.servlet.ServletException {
         // 既存のセッションを無効化し、新しいセッションを発行 （セッションの初期化）
-        request.getSession().invalidate();
+    //    request.getSession().invalidate();  >>SecurityFilterChainで
         // 新しいセッションを作成（Spring Bootが自動で生成する）
         HttpSession session = request.getSession(true);
         session.setAttribute("username", authentication.getName());  // ログインユーザーの名前を保存
@@ -26,5 +26,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         session.setAttribute("justLogin",true);//ログイン認証後flg
         // ログイン後に遷移する先
         response.sendRedirect("/work_submit");
+
     }
 }
