@@ -1,4 +1,5 @@
 package com.example.demo.service;
+import com.example.demo.dto.WorkRecordDto;
 import com.example.demo.model.UserEntity;
 import com.example.demo.model.WorkRecord;
 import com.example.demo.repository.UserRepository;
@@ -6,10 +7,13 @@ import com.example.demo.repository.WorkRecordRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 @Service
@@ -52,6 +56,20 @@ public class WorkRecordService {
     public List<WorkRecord> getUserRecordsByUsernameSort(String username){
         return workRecordRepository.findByUsername(username, Sort.by(Sort.Order.asc("clockInTime")) );
     }
+    //DBから出退勤記録取消
+    public void deleteWorkRecord(long id){
+        WorkRecord record = workRecordRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
+        workRecordRepository.delete(record);
+    }
+    //管理者判定
+    public boolean judgeRoles(String userName){
+        Optional<UserEntity> user = userRepository.findByUsername(userName);
+        boolean isAdmin = user.get().getRoles().contains("ADMIN");
+        System.out.println("work_records 管理者判定　："+userName+" : "+isAdmin);
+        return isAdmin;
+    }
+
     //位置判定処理　（現在地の緯度、経度、ユーザー名）
     public boolean checkGps(Double nowLat, Double nowLon, String userName) {
         final int R = 6371000; // 地球の半径 (メートル)
@@ -75,6 +93,28 @@ public class WorkRecordService {
         //現在地と勤務地の距離と許可範囲の比較結果を返す
         return distance <= allowedDistance;
     }
+    public List<String> getAllUserName(){
+        return userRepository.findAllUserName();
+    }
+    //ユーザーの勤務記録を取得しソートして返す
+    public List<WorkRecordDto> getUserRecordsDto(String username){
+        List<WorkRecord> userRecords = workRecordRepository.findByUsername(username, Sort.by(Sort.Order.asc("clockInTime")) );
+        List<WorkRecordDto> dtos = new ArrayList<>();
+        for (WorkRecord record : userRecords){
+        //    dtos.add(new WorkRecordDto(record));
+            WorkRecordDto dto = new WorkRecordDto(record);
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+    //全ての勤務記録を取得
+    public List<WorkRecord> getAllWorkRecords(){
+        return workRecordRepository.findAll();
+    }
+    public List<UserEntity> getAllUserEntity(){
+        return userRepository.findAll();
+    }
+
 
 //        public  List<WorkRecord> getAllWorkRecords(){
 //        return workRecordRepository.findAll();
@@ -85,8 +125,6 @@ public class WorkRecordService {
 //    public WorkRecord saveWorkRecord(WorkRecord workRecord){
 //        return workRecordRepository.save(workRecord);
 //    }
-//    public void deleteWorkRecord(long id){
-//        workRecordRepository.deleteById(id);
-//    }
+
 
 }

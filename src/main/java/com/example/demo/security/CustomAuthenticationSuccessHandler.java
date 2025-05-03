@@ -24,6 +24,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         session.setAttribute("username", authentication.getName());  // ログインユーザーの名前を保存
         session.setAttribute("gpsResult", false); //gpsResult初期化
         session.setAttribute("justLogin",true);//ログイン認証後flg
+        session.setAttribute("showUserName",null);//初期化
         // ログイン後に遷移する先
         response.sendRedirect("/work_submit");
 

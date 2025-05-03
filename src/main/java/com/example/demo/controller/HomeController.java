@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.WorkRecordDto;
 import com.example.demo.model.UserEntity;
 import com.example.demo.model.WorkRecord;
 import com.example.demo.repository.UserRepository;
@@ -118,31 +119,55 @@ public class HomeController {
     //出退勤記録取消(対象の出退勤記録のID、セッション)
     @PostMapping("/cancel/{id}")
     public String cancel(@PathVariable Long id, HttpSession session) {
-        WorkRecord record = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
         //DBから出退勤記録取消
-        repository.delete(record);
+        workRecordService.deleteWorkRecord(id);
         session.setAttribute("gpsResult", false);
         session.setAttribute("recordMg","出退勤記録を取消しました。");
         return "redirect:/work_submit";
     }
+    //勤怠記録一覧画面 管理者判定に応じたリダイレクト
+    @GetMapping("/work_records/redirect")
+    public String redirectWork_records(Authentication auth){
+        String userName = auth.getName();
+        //管理者判定に応じたリダイレクト
+        if (workRecordService.judgeRoles(userName)){
+            return "redirect:/work_recordsAdmin";
+        } else {
+            return "redirect:/work_records";
+        }
+    }
     //勤怠記録一覧画面
     @GetMapping("/work_records")
-    public String work_records(Model model, HttpSession session) {
-        //管理者判定
-        Authentication  auth = SecurityContextHolder.getContext().getAuthentication();
+    public String work_records(Model model, HttpSession session ,Authentication auth) {
+        //Authentication  auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
-        Optional<UserEntity> user = userRepository.findByUsername(userName);
-        String getRoles = user.get().getRoles();
-        boolean isAdmin = user.get().getRoles().contains("ADMIN") ;
-        model.addAttribute("isAdmin",isAdmin);
-        System.out.println("work_records 管理者判定　："+isAdmin+" : "+userName+getRoles);
         //usernameの全ての勤怠記録を取得
-        String username = (String) session.getAttribute("username");
-        List<WorkRecord> userWorkRecords = workRecordService.getUserRecordsByUsernameSort(username);
-        model.addAttribute("username", username);
+        List<WorkRecord> userWorkRecords = workRecordService.getUserRecordsByUsernameSort(userName);
         model.addAttribute("userWorkRecords", userWorkRecords);
+        model.addAttribute("username", userName);
         return "work_records";
     }
+    @GetMapping("/work_recordsAdmin")
+    public String work_recordsAdmin(Model model,HttpSession session,Authentication auth){
+        String userName = auth.getName();
+        //DBにあるユーザー
+        List<String> allUserName = workRecordService.getAllUserName();
+        model.addAttribute("allUserName",allUserName);
+        String showUserName =(String) session.getAttribute("showUserName");
+        if (showUserName != null){
+            List<WorkRecord> userWorkRecordList = workRecordService.getUserRecordsByUsernameSort(showUserName);
+            List<WorkRecordDto> workRecordDtoList = workRecordService.getUserRecordsDto(showUserName);
+            model.addAttribute("userWorkRecords",workRecordDtoList);
+            model.addAttribute("showUserName",showUserName);
+        }
+        return "work_recordsAdmin";
+    }
+    @PostMapping("/work_recordsAdmin")
+    public String work_recordsAdmin(HttpSession session,@RequestParam("userName") String showUserName){
+        session.setAttribute("showUserName",showUserName);
+        return "redirect:/work_recordsAdmin";
+
+    }
+
 
 }
