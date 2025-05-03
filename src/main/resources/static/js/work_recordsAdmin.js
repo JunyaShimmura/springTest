@@ -1,15 +1,15 @@
 let allRecords = [];
 
 document.addEventListener("DOMContentLoaded", async() =>{
+    // 月の選択肢設定
     const monthSelect = document.getElementById("month");
-    // 月の選択肢を追加
     for (let i = 1; i <= 12; i++) {
         const option = document.createElement("option");
         option.value = i;
         option.textContent = `${i}月`;
         monthSelect.appendChild(option);
     }
-    // 勤務記録を取得（バックエンドと通信）
+    // 勤務記録を取得（json バックエンドと通信）
     try {
        const res = await fetch("/api/work-records");
        allRecords = await res.json();
@@ -27,27 +27,7 @@ document.addEventListener("DOMContentLoaded", async() =>{
 
 } );
 
-function filterByMonth(month) {
-  const resultDiv = document.getElementById("result");
-  resultDiv.innerHTML = "";
-
-  const filtered = allRecords.filter(record => {
-    const date = new Date(record.lowDateTime);
-    return date.getMonth() + 1 === month;
-  });
-
-  if (filtered.length === 0) {
-    resultDiv.textContent = "この月の勤務記録はありません。";
-    return;
-  }
-  filtered.forEach(record => {
-    const div = document.createElement("div");
-    div.textContent = `${record.date} : ${record.clockInTime}: ${record.clockOutTime}`;
-    resultDiv.appendChild(div);
-  });
-
-}
-
+//選択された月の記録を動的に表示
 function filterByMonthTable(month) {
     const tbody = document.querySelector("#workRecordTable tbody");
     //  tbody　初期化
@@ -73,5 +53,26 @@ function filterByMonthTable(month) {
     `;
     tbody.appendChild(row);
     });
+
+}
+//  //動的表示例
+function filterByMonth(month) {
+  const resultDiv = document.getElementById("result");
+  resultDiv.innerHTML = "";
+
+  const filtered = allRecords.filter(record => {
+    const date = new Date(record.lowDateTime);
+    return date.getMonth() + 1 === month;
+  });
+
+  if (filtered.length === 0) {
+    resultDiv.textContent = "この月の勤務記録はありません。";
+    return;
+  }
+  filtered.forEach(record => {
+    const div = document.createElement("div");
+    div.textContent = `${record.date} : ${record.clockInTime}: ${record.clockOutTime}`;
+    resultDiv.appendChild(div);
+  });
 
 }
