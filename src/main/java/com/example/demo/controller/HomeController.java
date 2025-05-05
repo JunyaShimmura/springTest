@@ -141,25 +141,25 @@ public class HomeController {
     public String work_records(Model model, HttpSession session ,Authentication auth) {
         //Authentication  auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
-        //usernameの全ての勤怠記録を取得
-        List<WorkRecord> userWorkRecords = workRecordService.getUserRecordsByUsernameSort(userName);
-        model.addAttribute("userWorkRecords", userWorkRecords);
         model.addAttribute("username", userName);
+        //usernameの全ての勤怠記録を取得
+        //List<WorkRecord> userWorkRecords = workRecordService.getUserRecordsByUsernameSort(userName);
+        //model.addAttribute("userWorkRecords", userWorkRecords);
+        session.setAttribute("showUserName",userName);
+
         return "work_records";
     }
     @GetMapping("/work_recordsAdmin")
     public String work_recordsAdmin(Model model,HttpSession session,Authentication auth){
-        String userName = auth.getName();
-        //DBにあるユーザー
+        String loginUserName = auth.getName();
+        model.addAttribute("username", loginUserName);
+        //DBにある全ユーザー名を渡す  ラベル表示
         List<String> allUserName = workRecordService.getAllUserName();
         model.addAttribute("allUserName",allUserName);
+        //表示するユーザー
         String showUserName =(String) session.getAttribute("showUserName");
-        if (showUserName != null){
-            List<WorkRecord> userWorkRecordList = workRecordService.getUserRecordsByUsernameSort(showUserName);
-            List<WorkRecordDto> workRecordDtoList = workRecordService.getUserRecordsDto(showUserName);
-            model.addAttribute("userWorkRecords",workRecordDtoList);
-            model.addAttribute("showUserName",showUserName);
-        }
+        session.setAttribute("showUserName",showUserName);
+
         return "work_recordsAdmin";
     }
     @PostMapping("/work_recordsAdmin")

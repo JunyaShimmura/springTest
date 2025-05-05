@@ -107,6 +107,8 @@ public class WorkRecordService {
         }
         return dtos;
     }
+
+
     //全ての勤務記録を取得
     public List<WorkRecord> getAllWorkRecords(){
         return workRecordRepository.findAll();

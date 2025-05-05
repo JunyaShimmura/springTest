@@ -31,11 +31,9 @@
     <select id="month"></select>
 
     <div class="card p-4 mt-2">
-
         <h3 class="mb-2">勤務記録一覧</h3>
-        <h4 th:if="${showUserName != null}" >Name : <span th:text="${showUserName}"></span> </h4>
-        <h4 th:text="${#dates.format(#dates.createNow(), 'yyyy年MM月')}"></h4>
-        <div th:if="${userWorkRecords != null and not #lists.isEmpty(userWorkRecords)}">
+        <h4 th:if="${showUserName != null}" >表示するユーザー : <span th:text="${showUserName}"></span> </h4>
+        <h4 id="showMonth"></h4>
             <table id="workRecordTable" class="table table-bordered table-striped text-center">
                 <thead class="table-dark">
                 <tr>
@@ -48,10 +46,8 @@
                 <!-- js から表示   -->
                 </tbody>
             </table>
-        </div>
     </div>
-    <h3 th:if="${userWorkRecords == null or #lists.isEmpty(userWorkRecords)}">データがありません</h3>
-    <div id="result"></div>
+    <!-- 画面遷移ボタン   -->
     <div class="d-flex justify-content-center gap-5 mt-4">
         <a class="btn btn-success " href="/work_submit" role="button">出退報告画面</a>
         <a class="btn btn-danger " href="/" role="button">ログアウト</a>

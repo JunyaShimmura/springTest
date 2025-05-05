@@ -14,7 +14,7 @@ public class WorkRecordDto {
     private String date;
     private String clockInTime;
     private String clockOutTime;
-
+    //日付をフォーマットしてコンストラクト
     public WorkRecordDto(WorkRecord entity){
         this.lowDateTime = entity.getClockInTime();
         this.date = ldtFormatDate( entity.getClockInTime() );
