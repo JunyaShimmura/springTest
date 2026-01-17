@@ -105,10 +105,12 @@
 			<version>8.0.28</version> <!-- バージョンは最新を使用 -->
 		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>io.github.cdimascio</groupId>-->
-<!--			<artifactId>dotenv-java</artifactId>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 
 
 
