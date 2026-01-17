@@ -107,6 +107,9 @@ public class WorkRecordService {
         }
         return dtos;
     }
+    public WorkRecord saveWorkRecord(WorkRecord workRecord){
+        return workRecordRepository.save(workRecord);
+    }
 
 
     //全ての勤務記録を取得
@@ -123,9 +126,6 @@ public class WorkRecordService {
 //    }
 //    public Optional<WorkRecord> getWorkRecordById(long id){
 //        return workRecordRepository.findById(id);
-//    }
-//    public WorkRecord saveWorkRecord(WorkRecord workRecord){
-//        return workRecordRepository.save(workRecord);
 //    }
 
 

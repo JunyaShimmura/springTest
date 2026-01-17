@@ -69,25 +69,49 @@ function getLocationCheck(){
 }
 
 //地図表示処理(セッションに保存した位置情報を取得)
-function displayMap(){　
-    //セッションに保存した位置情報を取得
-    getLocationCheck();
-    let savedLocation = sessionStorage.getItem("setLocation");
-    let location = JSON.parse(savedLocation);
-    let lat = location.lat;
-    let lng = location.lng;
-    document.getElementById("locationText").innerText = `緯度: ${lat}, 経度: ${lng}` ;
+function displayMap(){
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
 
-    console.log("位置の描画開始！");
-    var map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: lat, lng: lng },
-        zoom: 15
-    });
-    new google.maps.marker.AdvancedMarkerElement({
-        position: { lat: lat, lng: lng },
-        map: map,
-        content: "現在地"
-    });
+                // 地図の初期化
+                const map = L.map('map').setView([lat, lng], 15);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+
+                L.marker([lat, lng]).addTo(map).bindPopup('現在地').openPopup();
+
+                // 【重要】描画が完了したタイミングでサイズを確定させる
+                // これを入れないと、高さが0になったりボタンに被ったりすることがあります
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 200);
+
+            }, function(error) {
+                console.error("GPSエラー:", error);
+            });
+        }
+//    //セッションに保存した位置情報を取得
+//    getLocationCheck();
+//    let savedLocation = sessionStorage.getItem("setLocation");
+//    let location = JSON.parse(savedLocation);
+//    let lat = location.lat;
+//    let lng = location.lng;
+//    document.getElementById("locationText").innerText = `緯度: ${lat}, 経度: ${lng}` ;
+//
+//    console.log("位置の描画開始！");
+//    var map = new google.maps.Map(document.getElementById('map'), {
+//        center: { lat: lat, lng: lng },
+//        zoom: 15
+//    });
+//    new google.maps.marker.AdvancedMarkerElement({
+//        position: { lat: lat, lng: lng },
+//        map: map,
+//        content: "現在地"
+//    });
 }
 //位置情報を取得し引数に応じたURLにsubmit
 function submitLocation (button) {

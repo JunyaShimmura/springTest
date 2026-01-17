@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 
 public class WorkRecordDto {
     //元のデータ
+    private Long id;
     private LocalDateTime lowDateTime;
     //表示用にフォーマットする値
     private String date;
@@ -16,12 +17,19 @@ public class WorkRecordDto {
     private String clockOutTime;
     //日付をフォーマットしてコンストラクト
     public WorkRecordDto(WorkRecord entity){
+        this.id = entity.getId();
         this.lowDateTime = entity.getClockInTime();
         this.date = ldtFormatDate( entity.getClockInTime() );
         this.clockInTime = ldtFormat(entity.getClockInTime());
         this.clockOutTime = ldtFormat(entity.getClockOutTime());
     }
+    public Long getId() {
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
     public LocalDateTime getLowDateTime() {
         return lowDateTime;
     }

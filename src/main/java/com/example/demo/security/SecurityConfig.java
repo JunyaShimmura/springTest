@@ -37,7 +37,8 @@ public class SecurityConfig {
         //        .csrf().disable() // CSRF保護を無効化 本番ではコメントアウトにし無効化にはしない
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()
-                     //   .requestMatchers("/admin/**").hasRole("ADMIN")
+                                //.requestMatchers("/api/work-records").permitAll() // ←ここで許可
+                                //   .requestMatchers("/admin/**").hasRole("ADMIN")
                         // ↓その他のリクエストに対しては認証が必要　＞＞認証から先の画面にいけなくなった
                         .anyRequest().authenticated()  // それ以外のリクエストには認証を求める
                         //.anyRequest().permitAll()  // すべてのリクエストを許可  一時的

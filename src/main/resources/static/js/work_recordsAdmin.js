@@ -50,7 +50,11 @@ function filterByMonthTable(month) {
     filtered.forEach(record => {
     const row = document.createElement("tr");
     row.innerHTML = `
-    <td>${record.date}</td>
+    <td>
+        <form th:action="@{/work_recordsAdmin/cancel/{id} (id=${record.id})}" method="post" >
+            <button type="submit">削除</button>
+        </form>
+    </td>
     <td>${record.clockInTime}</td>
     <td>${record.clockOutTime}</td>
     `;

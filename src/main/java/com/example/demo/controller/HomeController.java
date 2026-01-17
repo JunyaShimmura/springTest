@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -159,12 +160,45 @@ public class HomeController {
         //表示するユーザー
         String showUserName =(String) session.getAttribute("showUserName");
         session.setAttribute("showUserName",showUserName);
-
+        model.addAttribute("showUserName",showUserName);
+        //test用
+        List<WorkRecordDto> workRecordsList = workRecordService.getUserRecordsDto(loginUserName);
+        model.addAttribute("workRecordsList",workRecordsList);
         return "work_recordsAdmin";
+    }
+    @PostMapping("/work_recordsAdmin/cancel/{id}")
+    public String work_recordsAdmin_cancel(@PathVariable Long id ){
+        workRecordService.deleteWorkRecord(id);
+        return "redirect:/work_recordsAdmin";
     }
     @PostMapping("/work_recordsAdmin")
     public String work_recordsAdmin(HttpSession session,@RequestParam("userName") String showUserName){
         session.setAttribute("showUserName",showUserName);
+        return "redirect:/work_recordsAdmin";
+    }
+    @GetMapping("/work_recordsAdmin/work_recordAdd")
+    public String work_recordAdd (Model model,HttpSession session){
+        //DBにある全ユーザー名を渡す  ラベル表示
+        List<String> allUserName = workRecordService.getAllUserName();
+        model.addAttribute("allUserName",allUserName);
+        //表示するユーザー
+        String showUserName =(String) session.getAttribute("showUserName");
+        session.setAttribute("showUserName",showUserName);
+        model.addAttribute("showUserName",showUserName);
+        return "work_recordAdd";
+    }
+    @PostMapping("/work_recordsAdmin/work_recordAdd")
+    public String work_recordAdd(HttpSession session,@RequestParam("date") LocalDate date ,@RequestParam("checkInTime") LocalTime checkInTime,@RequestParam("checkOutTime") LocalTime checkOutTime ){
+        //日付と時間を結合＞＞LocalDateTime
+        LocalDateTime checkInDateTime = LocalDateTime.of(date,checkInTime);
+        LocalDateTime checkOutDateTime = LocalDateTime.of(date,checkOutTime);
+        String user = (String) session.getAttribute("showUserName");
+        //DBへ追加
+        WorkRecord record = new WorkRecord();
+        record.setUsername(user);
+        record.setClockInTime(checkInDateTime);
+        record.setClockOutTime(checkOutDateTime);
+        workRecordService.saveWorkRecord(record);
         return "redirect:/work_recordsAdmin";
 
     }

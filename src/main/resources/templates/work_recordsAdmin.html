@@ -34,18 +34,38 @@
         <h3 class="mb-2">勤務記録一覧</h3>
         <h4 th:if="${showUserName != null}" >表示するユーザー : <span th:text="${showUserName}"></span> </h4>
         <h4 id="showMonth"></h4>
-            <table id="workRecordTable" class="table table-bordered table-striped text-center">
-                <thead class="table-dark">
-                <tr>
-                    <th>日付</th>
-                    <th>出勤記録</th>
-                    <th>退勤記録</th>
-                </tr>
-                </thead>
-                <tbody>
-                <!-- js から表示   -->
-                </tbody>
-            </table>
+        <table id="workRecordTable" class="table table-bordered table-striped text-center">
+            <thead class="table-dark">
+            <tr>
+                <th>日付</th>
+                <th>出勤記録</th>
+                <th>退勤記録</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- js から表示   -->
+            </tbody>
+        </table>
+        <h3>-----test-------</h3>
+        <a class="btn btn-info" href="/work_recordsAdmin/work_recordAdd" role="button">追加</a>
+        <table class="table table-bordered table-striped text-center">
+            <thead>
+            <tr>
+                <th>操作</th>
+                <th>日付</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="record:${workRecordsList}">
+                <td>
+                    <form th:action="@{/work_recordsAdmin/cancel/{id} (id=${record.id})}" method="post">
+                        <button type="submit">削除</button>
+                    </form>
+                </td>
+                <td th:text="${record.date}" ></td>
+            </tr>
+            </tbody>
+        </table>
     </div>
     <!-- 画面遷移ボタン   -->
     <div class="d-flex justify-content-center gap-5 mt-4">
