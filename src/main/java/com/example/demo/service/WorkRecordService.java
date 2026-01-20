@@ -30,14 +30,14 @@ public class WorkRecordService {
     //出勤登録し位置判定結果を返す
     public boolean clockInResult(String userName,double lat,double lon){
         //位置判定結果を取得
-        boolean gpsResult = checkGps(lat,lon,userName);
+//        boolean gpsResult = checkGps(lat,lon,userName);
         //DBへ出勤記録を登録
         WorkRecord record = new WorkRecord();
         record.setUsername(userName);
         record.setClockInTime(LocalDateTime.now());
-        record.setClockInJudge(gpsResult);
+//        record.setClockInJudge(gpsResult);
         workRecordRepository.save(record);
-        return gpsResult;
+        return false;
     }
 
     //退勤登録し位置判定結果を返す

@@ -1,8 +1,10 @@
 package com.example.demo.security;
 
 import com.example.demo.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,63 +21,32 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import java.util.List;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
-    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
-    public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler ) {
-        this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();  // BCryptを使ったPasswordEncoderを返す
-    }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-        //        .csrf().disable() // CSRF保護を無効化 本番ではコメントアウトにし無効化にはしない
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()
-                                //.requestMatchers("/api/work-records").permitAll() // ←ここで許可
-                                //   .requestMatchers("/admin/**").hasRole("ADMIN")
-                        // ↓その他のリクエストに対しては認証が必要　＞＞認証から先の画面にいけなくなった
-                        .anyRequest().authenticated()  // それ以外のリクエストには認証を求める
-                        //.anyRequest().permitAll()  // すべてのリクエストを許可  一時的
-                )
-                .formLogin(login -> login
+                .csrf(csrf -> csrf.disable()) // API通信のために必須
+                .formLogin(form -> form
                         .loginPage("/login")
-                        .successHandler(customAuthenticationSuccessHandler)  // ログイン成功時の処理
-                        .failureUrl("/login?error=true")  // 認証失敗時のリダイレクト先
+                        // ★ここを追加！勝手なリダイレクトを防ぐ設定
+                        .successHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK); // 302ではなく200を返す
+                        })
                         .permitAll()
                 )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")  // ログアウトURL
-                        .logoutSuccessUrl("/login?logout")  // ログアウト後の遷移先
-                        .permitAll()
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)  // 必要に応じてセッションを作成
-                        .sessionFixation().newSession()  // ログイン後にセッションIDを変更
-                        .invalidSessionUrl("/login?invalid-session")  // セッションが無効の場合の遷移先
-                        .maximumSessions(1)  // 同時セッション数を1に制限
-                        .expiredUrl("/login?expired")  // セッション期限切れ時の遷移先
-                );
+                .authorizeHttpRequests(auth -> auth
+                        // ログイン関連は誰でもOK
+                        .requestMatchers("/login", "/api/auth/login", "/css/**", "/js/**").permitAll()
 
+                        // ★ここを hasRole("ADMIN") ではなく authenticated() に変える
+                        // これで「誰でもいいからログインしてれば通す」状態になります
+                        .requestMatchers("/work_submit").authenticated()
+
+                        .anyRequest().authenticated()
+                );
         return http.build();
     }
-
-    // AuthenticationManager の設定　　ログイン認証roles処理
-//    @Bean
-//    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
-//        // AuthenticationManagerBuilder を使って、ユーザー詳細情報サービスとパスワードエンコーダーを設定
-//        AuthenticationManagerBuilder authenticationManagerBuilder =
-//                http.getSharedObject(AuthenticationManagerBuilder.class);
-//        authenticationManagerBuilder
-//                .userDetailsService(customUserDetailsService)  // CustomUserDetailsService を指定
-//                .passwordEncoder(passwordEncoder());  // PasswordEncoder を指定
-//
-//        return authenticationManagerBuilder.build();
-//    }
-
 }
+

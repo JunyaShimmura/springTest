@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface WorkRecordRepository extends JpaRepository<WorkRecord,Long> {
 
-    WorkRecord findTopByUsername(String username);
 
     WorkRecord findTopByUsernameOrderByClockInTimeDesc(String username);
 

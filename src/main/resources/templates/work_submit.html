@@ -21,6 +21,9 @@
     <h3 class="">Name : <span th:text="${username}"></span></h3>
     <div class="card p-3">
         <h3>本日の勤務記録 </h3>
+        <!--隠しフィールド 用        -->
+        <input type="hidden" id="todayRecordId"
+               th:value="${userWorkRecord != null ? userWorkRecord.id : ''}">
         <table class=" table table-bordered table-striped text-center mb-2">
             <thead class="table-dark">
             <tr>
@@ -32,43 +35,36 @@
             <tbody>
             <tr>
                 <td th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"></td>
-                <td th:text="${isTodayRecorded  ?
-                    #temporals.format(userWorkRecord.clockInTime, 'HH:mm') : '---' }"></td>
-                <td th:text="${userWorkRecord.clockOutTime != null ?
-                    #temporals.format(userWorkRecord.clockOutTime, 'HH:mm') : '---'}"></td>
+                <td id="table-clock-in-time"></td>
+                <td id="table-clock-out-time"></td>
             </tr>
             </tbody>
         </table>
-        <p class="text-success mb-0" th:text="${recordMg}"></p>
+        <p class="text-success mb-0" id="recordMg"></p>
     </div>
 
     <div class="row g-2 mt-3 justify-content-center">
 
         <div class="col-6 col-md-auto">
-            <button type="button" form="locationForm"
+            <button type="button" id="punch-in-btn"
                     class="btn btn-success fw-bold w-100 py-2 text-nowrap"
                     style="min-width: 120px;"
-                    th:disabled="${isTodayRecorded}"
-                    onclick="submitLocation(this)" data-url="/clockIn">出勤</button>
+                    onclick="handlePunchIn()">出勤</button>
         </div>
 
         <div class="col-6 col-md-auto">
-            <button type="button" form="locationForm"
+            <button type="button" id="punch-out-btn"
                     class="btn btn-danger fw-bold w-100 py-2 text-nowrap"
                     style="min-width: 120px;"
-                    th:disabled="${!isTodayRecorded or userWorkRecord.clockOutTime != null}"
-                    onclick="submitLocation(this)"
-                    th:data-url="${userWorkRecord.clockInTime != null} ? @{/clock-out/{id}(id=${userWorkRecord.id})} : '#'">退勤</button>
+                    onclick="handlePunchOut()">退勤</button>
         </div>
 
         <div class="col-6 col-md-auto">
-            <form th:action="${(userWorkRecord.clockInTime != null and isTodayRecorded)} ? @{/cancel/{id}(id=${userWorkRecord.id})} : '#'"
-                  method="POST" class="w-100">
-                <button type="submit"
-                        class="btn btn-warning fw-bold text-dark w-100 py-2 text-nowrap"
-                        style="min-width: 120px;"
-                        th:disabled="${!isTodayRecorded}">取消</button>
-            </form>
+            <button type="button" id="cancel-btn"
+                    class="btn btn-warning fw-bold w-100 py-2 text-nowrap"
+                    style="min-width: 120px;"
+                    onclick="handleCancel()"
+            >取消</button>
         </div>
 
         <div class="col-6 col-md-auto">
@@ -79,16 +75,13 @@
 
     </div>
 
-    <form id="locationForm" method="post">
-        <input type="hidden" id="lat" name="lat">
-        <input type="hidden" id="lon" name="lon">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-    </form>
     <section class="mt-3">
         <p>勤務地：<span th:text="${workPlace}"></span></p>
         <p th:if="${gpsResult}" class="text-success">位置判定 : 勤務地にいることが確認できました。</p>
         <div id="map" style="height: 250px; width: 100%;"></div>
         <p id="locationText"></p>
+        <input type="hidden" id="lat" name="lat">
+        <input type="hidden" id="lng" name="lng">
         <button type="button" onclick="displayMap()" class="btn btn-outline-primary ">現在値表示</button>
         <p><br>勤務地を登録した場合は位置判定も記録されますが、出退勤の報告可否に影響するものではありません</p>
     </section>
@@ -106,6 +99,6 @@
 <!--            async defer></script>-->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script th:src="@{/js/map.js}" defer></script>
-
+    <script src="/js/workSubmit.js"></script>
 </body>
 </html>

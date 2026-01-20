@@ -13,10 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -60,7 +58,9 @@ public class HomeController {
     //出退勤登録画面
     @GetMapping("/work_submit")
     public String work_submit(HttpSession session, Model model) {
-        String username = (String) session.getAttribute("username");
+        UserEntity user = (UserEntity) session.getAttribute("user");
+        String username = user.getUsername();
+        System.out.println("work_submit cont");
         if (username == null) {
             return "redirect:/"; // 未ログインならログインページへ
         }
@@ -80,13 +80,13 @@ public class HomeController {
         //今日のレコードがなければ
         if (!isTodayRecorded) {
             userWorkRecord.setClockOutTime(null);
+            userWorkRecord = new WorkRecord();
         }
-        System.out.println("getmap/workSubmit#gpsResult:" + session.getAttribute("gpsResult"));
-        model.addAttribute("isTodayRecorded", isTodayRecorded);
         model.addAttribute("userWorkRecord", userWorkRecord);
+        model.addAttribute("isTodayRecorded", isTodayRecorded);
+
         model.addAttribute("workPlace", workPlace);
         model.addAttribute("gpsResult", session.getAttribute("gpsResult"));
-        model.addAttribute("googleMapsApiKey", googleMapsApiKey);
         //justLoginをhtmlに渡してから削除
         model.addAttribute("justLogin", session.getAttribute("justLogin"));
         session.removeAttribute("justLogin");

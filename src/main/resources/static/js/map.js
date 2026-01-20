@@ -1,136 +1,82 @@
-let lat = null,lng = null;
-const LIMIT_TIME = 10*60*1000; //10分
+// 地図オブジェクトを保持する変数
+let leafletMap = null;
 
-function initMap() {
-    console.log("initMap！");
-    //位置情報を取得しセッションに保存
-    getLocationSave() ;
-    // setTimeoutで描画を遅らせてUIブロック回避
-    setTimeout(() => {
-        //地図表示処理
-        displayMap();
-    }, 100)
-}
-    // ボタンのクリックイベントリスナーを設定
-document.addEventListener('DOMContentLoaded', function() {
+/**
+ * 地図を表示するメイン関数
+ */
+function displayMap() {
+    console.log("位置情報取得を開始します...");
 
-    // justLogin ログイン直後の時　initMap()実行
-    let justLogin =  document.body.dataset.justLogin;  // data-just-login の値を取得
-    console.log("justLoginの値:", justLogin);
-     if (justLogin === "true") {
-        initMap();
-     }
+    // ブラウザが位置情報に対応しているか確認
+    if (!navigator.geolocation) {
+        alert("お使いのブラウザは位置情報に対応していません。");
+        return;
+    }
 
-});
+    // 位置情報を取得
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            console.log("位置取得成功:", lat, lng);
 
-//位置情報を取得しセッションに保存
-function getLocationSave() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            function(position){
-                //現在地取得
-                lat = position.coords.latitude;
-                lng = position.coords.longitude;
-                console.log("位置取得：",lat,lng);
-                //位置情報をセッションに保存
-                sessionStorage.setItem("setLocation",JSON.stringify({lat,lng}));
-                sessionStorage.setItem("setLocationTime",Date.now());
-            },
-            function(error){
-                document.getElementById("locationText").innerText="位置情報を取得できませんでした";
-            },
-            {
-                enableHighAccuracy : false,
-                timeout:15000,
-                maximumAge:60000
+            const mapElement = document.getElementById('map');
+            if (!mapElement) {
+                console.error("地図を表示する要素（id='map'）が見つかりません。");
+                return;
             }
-        );
-    } else {
-        alert("位置情報を取得できませんでした: " + error.message);
-    }
-    document. getElementById('locationText'). textContent = '位置情報取得中...';
-}
-//取得した現在地を再利用できるかチェック、NGのときは再取得しセッションへセット
-function getLocationCheck(){
-    let location = sessionStorage.getItem("setLocation");
-    let locationGetTime = sessionStorage.getItem("setLocationTime");
 
-    if (location && locationGetTime){
-        let elapsedTime = Date.now() - parseInt(locationGetTime) ;
-        if (elapsedTime < LIMIT_TIME) {
-            console.log("セッションから位置情報を再利用:");
-        } else {
-            console.log("位置情報の有効期限切れ、再取得");
-            sessionStorage.removeItem("setLocation");
-            sessionStorage.removeItem("setLocationTime");
-            getLocation();
+            // --- Leafletの初期化 ---
+            // 既に地図が表示されている場合は一旦削除（二重表示エラー防止）
+            if (leafletMap !== null) {
+                leafletMap.remove();
+            }
+
+            // [lat, lng] を中心にズームレベル15で表示
+            leafletMap = L.map('map').setView([lat, lng], 15);
+
+            // 地図の絵（タイル）を読み込む（OpenStreetMap）
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(leafletMap);
+
+            // ピンを立てる
+            L.marker([lat, lng]).addTo(leafletMap);
+
+            // Bootstrap等のレイアウト干渉対策（少し遅れてサイズを再確定させる）
+            setTimeout(() => {
+                leafletMap.invalidateSize();
+            }, 200);
+
+            // 緯度経度をテキストで表示（もしHTMLに要素があれば）
+            const textElem = document.getElementById("locationText");
+            if (textElem) {
+                textElem.innerText = `緯度: ${lat.toFixed(5)} / 経度: ${lng.toFixed(5)}`;
+            }
+            document.getElementById("lat").value = lat;
+            document.getElementById("lng").value = lng;
+        },
+        function(error) {
+            console.error("GPS取得エラー:", error);
+            let msg = "位置情報の取得に失敗しました。";
+            if (error.code === 1) msg = "位置情報の利用が許可されていません。設定を確認してください。";
+            alert(msg);
+        },
+        {
+            enableHighAccuracy: true, // 精度重視
+            timeout: 10000,           // 10秒でタイムアウト
+            maximumAge: 0             // 常に最新を取得
         }
-    }
+    );
 }
 
-//地図表示処理(セッションに保存した位置情報を取得)
-function displayMap(){
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-
-                // 地図の初期化
-                const map = L.map('map').setView([lat, lng], 15);
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
-
-                L.marker([lat, lng]).addTo(map).bindPopup('現在地').openPopup();
-
-                // 【重要】描画が完了したタイミングでサイズを確定させる
-                // これを入れないと、高さが0になったりボタンに被ったりすることがあります
-                setTimeout(() => {
-                    map.invalidateSize();
-                }, 200);
-
-            }, function(error) {
-                console.error("GPSエラー:", error);
-            });
-        }
-//    //セッションに保存した位置情報を取得
-//    getLocationCheck();
-//    let savedLocation = sessionStorage.getItem("setLocation");
-//    let location = JSON.parse(savedLocation);
-//    let lat = location.lat;
-//    let lng = location.lng;
-//    document.getElementById("locationText").innerText = `緯度: ${lat}, 経度: ${lng}` ;
-//
-//    console.log("位置の描画開始！");
-//    var map = new google.maps.Map(document.getElementById('map'), {
-//        center: { lat: lat, lng: lng },
-//        zoom: 15
-//    });
-//    new google.maps.marker.AdvancedMarkerElement({
-//        position: { lat: lat, lng: lng },
-//        map: map,
-//        content: "現在地"
-//    });
-}
-//位置情報を取得し引数に応じたURLにsubmit
-function submitLocation (button) {
-   // 送信設定　引数のボタンに応じたURL
-    let url = button.getAttribute("data-url")
-    let form = document.getElementById("locationForm");
-    form.action = url;
-    //セッションに保存した位置情報を取得
-    getLocationCheck();
-    let savedLocation = sessionStorage.getItem("setLocation");
-    if (savedLocation) {
-        let location = JSON.parse(savedLocation);
-        document.getElementById("lat").value = location.lat;
-        document.getElementById("lon").value = location.lng;
-    }
-    console.log("submit緯度経度 ：",lat,lng);
-    form.submit();
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-    // ボタンのクリックイベントリスナーを設定
+/**
+ * ページ読み込み時の処理
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    // ログイン直後の時だけ自動実行する場合（HTMLのdata属性を確認）
+    const justLogin = document.body.dataset.justLogin;
+//    if (justLogin === "true") {
+        displayMap();
+//    }
 });
