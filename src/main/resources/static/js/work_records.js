@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async() =>{
     }
     // 勤務記録を取得（json バックエンドと通信）
     try {
-       const res = await fetch("/api/work-records");
+       const res = await fetch("/api/attendance/work-records");
        allRecords = await res.json();
         //初期表示　今月
        filterByMonthTable(today.getMonth()+1);
@@ -57,24 +57,3 @@ function filterByMonthTable(month) {
     tbody.appendChild(row);
     });
 }
-//  //動的表示例
-//function filterByMonth(month) {
-//  const resultDiv = document.getElementById("result");
-//  resultDiv.innerHTML = "";
-//
-//  const filtered = allRecords.filter(record => {
-//    const date = new Date(record.lowDateTime);
-//    return date.getMonth() + 1 === month;
-//  });
-//
-//  if (filtered.length === 0) {
-//    resultDiv.textContent = "この月の勤務記録はありません。";
-//    return;
-//  }
-//  filtered.forEach(record => {
-//    const div = document.createElement("div");
-//    div.textContent = `${record.date} : ${record.clockInTime}: ${record.clockOutTime}`;
-//    resultDiv.appendChild(div);
-//  });
-//
-//}

@@ -1,5 +1,6 @@
 package com.example.demo.api;
 
+import com.example.demo.dto.WorkRecordDto;
 import com.example.demo.model.UserEntity;
 import com.example.demo.model.WorkRecord;
 import com.example.demo.repository.WorkRecordRepository;
@@ -7,14 +8,12 @@ import com.example.demo.service.WorkRecordService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -126,5 +125,10 @@ public class AttendanceApiController {
         return ResponseEntity.ok(Map.of(
                 "message", "取り消しました"
         ));
+    }
+    @GetMapping("/work-records")
+    public List<WorkRecordDto> getAllWorkRecords(HttpSession session) {
+        String userName = (String) session.getAttribute("showUserName");
+        return workRecordService.getUserRecordsDto(userName);
     }
 }

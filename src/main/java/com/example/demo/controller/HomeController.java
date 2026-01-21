@@ -37,9 +37,6 @@ public class HomeController {
         this.workRecordService = workRecordService;
     }
 
-    @Value("${googleMapsApiKey}")
-    private String googleMapsApiKey;
-
     //初期設定はログイン画面へ遷移
     @GetMapping("/")
     public String Top(Model model) {
@@ -58,9 +55,9 @@ public class HomeController {
     //出退勤登録画面
     @GetMapping("/work_submit")
     public String work_submit(HttpSession session, Model model) {
+        // Sessionからユーザー情報を取り出す　（ログイン時保存）
         UserEntity user = (UserEntity) session.getAttribute("user");
         String username = user.getUsername();
-        System.out.println("work_submit cont");
         if (username == null) {
             return "redirect:/"; // 未ログインならログインページへ
         }
@@ -84,14 +81,7 @@ public class HomeController {
         }
         model.addAttribute("userWorkRecord", userWorkRecord);
         model.addAttribute("isTodayRecorded", isTodayRecorded);
-
         model.addAttribute("workPlace", workPlace);
-        model.addAttribute("gpsResult", session.getAttribute("gpsResult"));
-        //justLoginをhtmlに渡してから削除
-        model.addAttribute("justLogin", session.getAttribute("justLogin"));
-        session.removeAttribute("justLogin");
-        model.addAttribute("recordMg",session.getAttribute("recordMg"));
-        session.removeAttribute("recordMg");
         return "work_submit";
     }
     //出勤登録　（セッション、現在値の緯度経度）
@@ -131,11 +121,13 @@ public class HomeController {
     public String redirectWork_records(Authentication auth){
         String userName = auth.getName();
         //管理者判定に応じたリダイレクト
-        if (workRecordService.judgeRoles(userName)){
-            return "redirect:/work_recordsAdmin";
-        } else {
-            return "redirect:/work_records";
-        }
+//        if (workRecordService.judgeRoles(userName)){
+//            return "redirect:/work_recordsAdmin";
+//        } else {
+//            return "redirect:/work_records";
+//        }
+        return "redirect:/work_records";
+
     }
     //勤怠記録一覧画面
     @GetMapping("/work_records")

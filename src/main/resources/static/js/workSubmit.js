@@ -1,7 +1,7 @@
 const LIMIT_TIME = 10*60*1000; //10分
 let todayRecordId,lat,lng, tdClockIn, tdClockOut,recordMg, inBtn, outBtn, cancelBtn;
 // ページ読み込み時の処理
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded',async function() {
     todayRecordId = document.getElementById("todayRecordId").value;
     lat = document.getElementById("lat").value;
     lng = document.getElementById("lng").value;
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     cancelBtn = document.getElementById("cancel-btn");
 
     if (todayRecordId !== "") {
-        getWorkRecord(todayRecordId);
+        await getWorkRecord(todayRecordId);
     }
     updateButtonUI();
 });
@@ -35,8 +35,6 @@ function disabledBtn(btn) {
 }
 //ボタン見た目を変える
 function updateButtonUI() {
-    const todayRecordId = document.getElementById("todayRecordId").value;
-
     if (todayRecordId !== "") {
         updateButtonColor(cancelBtn,"btn-warning");
         disabledBtn(inBtn);
@@ -44,7 +42,6 @@ function updateButtonUI() {
         updateButtonColor(inBtn,"btn-success");
         disabledBtn(cancelBtn);
     }
-
     if (todayRecordId !== "" && tdClockOut.textContent.trim() === ""){
         updateButtonColor(outBtn,"btn-danger");
     } else {
@@ -76,10 +73,9 @@ async function handlePunchIn() {
         });
         if (response.ok) {
             const result = await response.json();
+            todayRecordId = result.id;
+            tdClockIn.textContent = result.clockInTime;
             recordMg.textContent = result.message;
-            todayClockInTime = result.clockInTime;
-            document.getElementById("todayRecordId").value = result.id;
-            tdClockIn.textContent = todayClockInTime;
             updateButtonUI();
         } else {
             const errorText = await response.text();
@@ -91,15 +87,14 @@ async function handlePunchIn() {
 }
 
 async function handlePunchOut() {
-    todayRecordId = document.getElementById("todayRecordId").value;
     try {
         const res = await fetch(`/api/attendance/punch-out/${todayRecordId}`, {
             method: 'POST'
         });
         if (res.ok) {
             const result = await res.json();
-            recordMg.textContent = result.message;
             tdClockOut.textContent = result.clockOutTime;
+            recordMg.textContent = result.message;
             updateButtonUI();
         } else {
             const errorText = await res.text();
@@ -111,17 +106,16 @@ async function handlePunchOut() {
 }
 
 async function handleCancel() {
-    const todayRecordId = document.getElementById("todayRecordId").value;
     try {
         const response = await fetch(`/api/attendance/cancel/${todayRecordId}`, {
                 method: 'POST'
             });
         if (response.ok) {
             const result = await response.json();
-            recordMg.textContent = result.message;
-            document.getElementById("todayRecordId").value = "";
+            todayRecordId = "";
             tdClockIn.textContent = "";
             tdClockOut.textContent = "";
+            recordMg.textContent = result.message;
             updateButtonUI();
         } else {
             const errorText = await response.text();

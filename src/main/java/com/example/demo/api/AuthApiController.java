@@ -49,6 +49,7 @@ public class AuthApiController {
 
                 // 5. ★最重要：セッションに認証コンテキストを保存（403対策）
                 session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+                // Sessionにユーザーオブジェクトを保存
                 session.setAttribute("user", user);
 
                 return ResponseEntity.ok(Map.of("status", "success"));

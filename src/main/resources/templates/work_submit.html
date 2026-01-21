@@ -87,16 +87,12 @@
     </section>
 
     <div class="d-flex justify-content-center ">
-        <a href="/login" class="btn btn-secondary" style="width:150px; height:40px;"> 戻 る </a>
+        <a href="/login" class="btn btn-secondary" style="width:25%; height:40px;"> 戻 る </a>
     </div>
     <!-- フッター -->
     <footer class="mt-2 text-center">
         <p>&copy; 2025 勤怠報告アプリ - All Rights Reserved</p>
     </footer>
-    <!-- '&callback=initMap'でページ表示時に実行 一時的にOFF-->
-    <!--ボタン押下で表示-->
-<!--    <script th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${@environment.getProperty('googleMapsApiKey')}}"-->
-<!--            async defer></script>-->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script th:src="@{/js/map.js}" defer></script>
     <script src="/js/workSubmit.js"></script>

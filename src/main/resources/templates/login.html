@@ -8,9 +8,28 @@
 </head>
 <body class="container mt-3 bg-warning-subtle">
     <h1 class="text-center my-4 display-4 fw-bold">勤怠報告アプリ</h1>
-    <input type="text" id="username" placeholder="ユーザー名">
-    <input type="password" id="password" placeholder="パスワード">
-    <button type="button" onclick="executeLogin()">ログイン</button>
+    <div class="mb-3">
+        <label for="username"  class="form-label">ユーザー名</label>
+        <input type="text" id="username"
+               placeholder="ユーザー名"
+               class="form-control">
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">パスワード(10桁)</label>
+        <input type="password" id="password"
+               placeholder="パスワード"
+               class="form-control">
+    </div>
+    <button type="button" class="btn btn-success w-50 btn-lg mb-3"
+            onclick="executeLogin()">ログイン</button>
+
+    <!-- アプリの概要 -->
+    <section class="mt-3 pt-3">
+        <h5>サンプルユーザー　誰でも閲覧可</h5>
+        <P>ユーザー名とパスワードを入力後、勤怠報告画面に遷移します。</P>
+        <p>サンプル１<br>[ユーザー名:user1][パスワード:pass12word]</p>
+        <p>サンプル２<br>[ユーザー名:user2][パスワード:pass12word]</p>
+    </section>
 
     <script>
         async function executeLogin() {
@@ -22,27 +41,15 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: user, password: pass })
             });
-
             const result = await response.json();
 
             if (response.ok) {
-                // 【重要】ここでJSが「次へ行く」と判断する
-                console.log("ログイン成功！遷移します...");
+                //  work_submit　へリダイレクト
                 window.location.href = '/work_submit';
             } else {
-                // ページ遷移せず、エラーメッセージを表示
-                console.error("ログイン失敗:", response.status);
                 alert(result.message);
             }
         }
     </script>
-
-    <!-- アプリの概要 -->
-    <section class="mt-3 pt-3">
-        <h5>サンプルユーザー　誰でも閲覧可</h5>
-        <P>ユーザー名とパスワードを入力後、勤怠報告画面に遷移します。</P>
-        <p>サンプル１<br>[ユーザー名:user1][パスワード:pass12word]</p>
-        <p>サンプル２<br>[ユーザー名:user2][パスワード:pass12word]</p>
-    </section>
 </body>
 </html>
