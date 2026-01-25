@@ -15,15 +15,14 @@
 </style>
 
 </head>
-<!-- data-just-login="${justLogin} を.jsに渡す-->
-<body class="container mt-3 bg-warning-subtle" th:data-just-login="${justLogin}">
+<body class="container mt-3 bg-warning-subtle" >
     <h1 class="text-center my-2 display-6 fw-bold">勤怠報告アプリ</h1>
     <h3 class="">Name : <span th:text="${username}"></span></h3>
     <div class="card p-3">
         <h3>本日の勤務記録 </h3>
         <!--隠しフィールド 用        -->
         <input type="hidden" id="todayRecordId"
-               th:value="${userWorkRecord != null ? userWorkRecord.id : ''}">
+               th:value="${todayRecordId}">
         <table class=" table table-bordered table-striped text-center mb-2">
             <thead class="table-dark">
             <tr>
@@ -44,40 +43,34 @@
     </div>
 
     <div class="row g-2 mt-3 justify-content-center">
-
         <div class="col-6 col-md-auto">
             <button type="button" id="punch-in-btn"
                     class="btn btn-success fw-bold w-100 py-2 text-nowrap"
                     style="min-width: 120px;"
                     onclick="handlePunchIn()">出勤</button>
         </div>
-
         <div class="col-6 col-md-auto">
             <button type="button" id="punch-out-btn"
                     class="btn btn-danger fw-bold w-100 py-2 text-nowrap"
                     style="min-width: 120px;"
                     onclick="handlePunchOut()">退勤</button>
         </div>
-
         <div class="col-6 col-md-auto">
             <button type="button" id="cancel-btn"
                     class="btn btn-warning fw-bold w-100 py-2 text-nowrap"
                     style="min-width: 120px;"
-                    onclick="handleCancel()"
-            >取消</button>
+                    onclick="handleCancel()">取消</button>
         </div>
-
         <div class="col-6 col-md-auto">
             <a href="/work_records/redirect"
                class="btn btn-primary fw-bold w-100 py-2 text-nowrap d-flex align-items-center justify-content-center"
                style="min-width: 120px;">出退一覧</a>
         </div>
-
     </div>
 
     <section class="mt-3">
         <p>勤務地：<span th:text="${workPlace}"></span></p>
-        <p th:if="${gpsResult}" class="text-success">位置判定 : 勤務地にいることが確認できました。</p>
+        <p id="gpsResult"></p>
         <div id="map" style="height: 250px; width: 100%;"></div>
         <p id="locationText"></p>
         <input type="hidden" id="lat" name="lat">
@@ -94,7 +87,7 @@
         <p>&copy; 2025 勤怠報告アプリ - All Rights Reserved</p>
     </footer>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script th:src="@{/js/map.js}" defer></script>
+    <script src="/js/map.js" defer></script>
     <script src="/js/workSubmit.js"></script>
 </body>
 </html>

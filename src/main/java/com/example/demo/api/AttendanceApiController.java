@@ -3,15 +3,14 @@ package com.example.demo.api;
 import com.example.demo.dto.WorkRecordDto;
 import com.example.demo.model.UserEntity;
 import com.example.demo.model.WorkRecord;
+import com.example.demo.model.WorkRecordResponse;
 import com.example.demo.repository.WorkRecordRepository;
 import com.example.demo.service.WorkRecordService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.thymeleaf.util.ObjectUtils;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -29,88 +28,53 @@ public class AttendanceApiController {
 
     @PostMapping("/getWorkRecord/{id}")
     public ResponseEntity<?> getWorkRecord (@PathVariable Long id, HttpSession session) {
+
+        WorkRecordResponse res = new WorkRecordResponse();
         // セッションから丸ごと保存したユーザー情報を取り出す
-        UserEntity user = (UserEntity) session.getAttribute("user");
-        WorkRecord userWorkRecord;
-        String clockInTimeRecord ="";
-        String clockOutTimeRecord ="";
-        if (user == null) {
-            return ResponseEntity.status(401).body("セッションが切れました。再ログインしてください。");
-        }
+        UserEntity userEntity = (UserEntity) session.getAttribute("user");
         try {
-            //ユーザーの最新のレコードを取得
-            userWorkRecord = workRecordRepository.findById(id)
-                    .orElseThrow(() -> null);
-        } catch (Exception e) {
+            res = workRecordService.handleGetWorkRecord(userEntity, id);
+        } catch (Exception e){
+            if ("SESSION_TIMEOUT".equals(e.getMessage())) {
+                return ResponseEntity.status(401).body("セッションが切れました。再ログインしてください。");
+            }
+            if ("ERROR_FETCH_RECORD".equals(e.getMessage())){
+                return ResponseEntity.status(500).body("レコードを取得エラーが発生しました");
+            }
             return ResponseEntity.status(500).body("レコードを取得エラーが発生しました");
         }
-        if (userWorkRecord != null){
-            if (userWorkRecord.getClockInTime() != null){
-                clockInTimeRecord = userWorkRecord.getClockInTime().format(DTF_HHMM);
-            }
-            if(userWorkRecord.getClockOutTime() != null){
-                clockOutTimeRecord = userWorkRecord.getClockOutTime().format(DTF_HHMM);
-            }
-        }
-        return ResponseEntity.ok(Map.of(
-                "message", "レコードを取得",
-                "clockInTime",clockInTimeRecord,
-                "clockOutTime",clockOutTimeRecord
-        ));
+        return ResponseEntity.ok(res);
     }
 
     @PostMapping("/punch-in")
     public ResponseEntity<?> punchIn(HttpSession session) {
-        // セッションから丸ごと保存したユーザー情報を取り出す
-        UserEntity user = (UserEntity) session.getAttribute("user");
-        WorkRecord userWorkRecord;
-        boolean gpsResult;
-        if (user == null) {
-            return ResponseEntity.status(401).body("セッションが切れました。再ログインしてください。");
-        }
-        try {
-            //出勤登録し位置判定結果を返す
-            gpsResult = workRecordService.clockInResult(user.getUsername(),1.0,1.0);
-            } catch (Exception e) {
-                return ResponseEntity.status(500).body("clockInResult エラーが発生しました");
-        }
-        try {
-            //ユーザーの最新のレコードを取得
-            userWorkRecord = workRecordRepository.findTopByUsernameOrderByClockInTimeDesc(user.getUsername());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("レコードを取得エラーが発生しました");
-        }
-        String clockInTimeRecord = userWorkRecord.getClockInTime().format(DTF_HHMM);
 
-        return ResponseEntity.ok(Map.of(
-                "message", "出勤打刻しました",
-                "id",userWorkRecord.getId(),
-                "clockInTime",clockInTimeRecord
-        ));
+        UserEntity userEntity = (UserEntity) session.getAttribute("user");
+        WorkRecordResponse res;
+        try {
+            res = workRecordService.handleClockIn(userEntity);
+        } catch (Exception e) {
+            // メッセージの内容によってステータスを出し分ける
+            if ("SESSION_TIMEOUT".equals(e.getMessage())) {
+                return ResponseEntity.status(401).body("セッションが切れました。再ログインしてください。");
+            }
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+        return ResponseEntity.ok(res);
     }
     @PostMapping("/punch-out/{id}")
     public ResponseEntity<?> punchOut(@PathVariable Long id,HttpSession session) {
         UserEntity user = (UserEntity) session.getAttribute("user");
-        WorkRecord userWorkRecord ;
+        WorkRecordResponse res;
         try {
             //ユーザーの最新のレコードを取得
             // 退勤登録 位置判定結果　workRecordService
-            boolean gpsResult = workRecordService.clockOutResult(id,user.getUsername(),1.0,1.0);
+           res = workRecordService.handleClockOut(id,user.getUsername(),1.0,1.0);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("エラーが発生しました");
+            return ResponseEntity.status(500).body(e.getMessage());
         }
-        try {
-            //ユーザーの最新のレコードを取得
-            userWorkRecord = workRecordRepository.findTopByUsernameOrderByClockInTimeDesc(user.getUsername());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("レコードを取得エラーが発生しました");
-        }
-        String clockOutTimeRecord = userWorkRecord.getClockOutTime().format(DTF_HHMM);
 
-        return ResponseEntity.ok(Map.of(
-                "message", "退勤打刻しました",
-                "clockOutTime",clockOutTimeRecord
-        ));
+        return ResponseEntity.ok(res);
     }
     @PostMapping("/cancel/{id}")
     public ResponseEntity<?> cancel(@PathVariable Long id, HttpSession session) {

@@ -2,7 +2,6 @@ const LIMIT_TIME = 10*60*1000; //10分
 let todayRecordId,lat,lng, tdClockIn, tdClockOut,recordMg, inBtn, outBtn, cancelBtn;
 // ページ読み込み時の処理
 document.addEventListener('DOMContentLoaded',async function() {
-    todayRecordId = document.getElementById("todayRecordId").value;
     lat = document.getElementById("lat").value;
     lng = document.getElementById("lng").value;
     tdClockIn = document.getElementById("table-clock-in-time");
@@ -11,8 +10,9 @@ document.addEventListener('DOMContentLoaded',async function() {
     inBtn = document.getElementById("punch-in-btn");
     outBtn = document.getElementById("punch-out-btn");
     cancelBtn = document.getElementById("cancel-btn");
+    todayRecordId = document.getElementById("todayRecordId").value;
 
-    if (todayRecordId !== "") {
+    if (todayRecordId !== '0') {
         await getWorkRecord(todayRecordId);
     }
     updateButtonUI();
@@ -35,14 +35,14 @@ function disabledBtn(btn) {
 }
 //ボタン見た目を変える
 function updateButtonUI() {
-    if (todayRecordId !== "") {
+    if (todayRecordId !== "0") {
         updateButtonColor(cancelBtn,"btn-warning");
         disabledBtn(inBtn);
     } else {
         updateButtonColor(inBtn,"btn-success");
         disabledBtn(cancelBtn);
     }
-    if (todayRecordId !== "" && tdClockOut.textContent.trim() === ""){
+    if (todayRecordId !== "0" && tdClockOut.textContent.trim() === ""){
         updateButtonColor(outBtn,"btn-danger");
     } else {
         disabledBtn(outBtn);
@@ -112,7 +112,7 @@ async function handleCancel() {
             });
         if (response.ok) {
             const result = await response.json();
-            todayRecordId = "";
+            todayRecordId = "0";
             tdClockIn.textContent = "";
             tdClockOut.textContent = "";
             recordMg.textContent = result.message;

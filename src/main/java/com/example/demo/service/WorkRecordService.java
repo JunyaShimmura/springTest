@@ -2,17 +2,17 @@ package com.example.demo.service;
 import com.example.demo.dto.WorkRecordDto;
 import com.example.demo.model.UserEntity;
 import com.example.demo.model.WorkRecord;
+import com.example.demo.model.WorkRecordResponse;
+import com.example.demo.model.UserInfoResponse;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WorkRecordRepository;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,40 +21,124 @@ public class WorkRecordService {
     @Autowired
     private final UserRepository userRepository;
     private final WorkRecordRepository workRecordRepository;
+    private WorkRecordService workRecordService;
+
     @Autowired
     public  WorkRecordService (UserRepository userRepository ,WorkRecordRepository workRecordRepository){
         this.userRepository = userRepository;
         this.workRecordRepository = workRecordRepository;
     }
+    DateTimeFormatter DTF_HHMM = DateTimeFormatter.ofPattern("HH:mm");
+
+
+    public UserInfoResponse workSubmitInit(String username) {
+        UserInfoResponse userInfoResponse = new UserInfoResponse();
+        Long todayRecordId = 0L;
+
+        Optional<UserEntity> userRecord = userRepository.findByUsername(username);
+        String workPlace = userRecord.get().getWorkPlace();
+
+        //ユーザーの最新のレコードを取得　　　　　　　　
+        WorkRecord userWorkRecord = workRecordRepository.findTopByUsernameOrderByClockInTimeDesc(username);
+        if ((!(userWorkRecord == null)) && (userWorkRecord.getClockInTime() != null)) {
+            //当日のレコードがあるか判定
+            if (userWorkRecord.getClockInTime().toLocalDate().equals(LocalDate.now())) {
+                todayRecordId = userWorkRecord.getId();
+            }
+        }
+        userInfoResponse.setUsername(username);
+        userInfoResponse.setTodayRecordId(todayRecordId);
+        userInfoResponse.setWorkPlace(workPlace);
+        return userInfoResponse;
+    }
+    public WorkRecordResponse handleGetWorkRecord(UserEntity userEntity,Long id){
+        WorkRecordResponse res = new WorkRecordResponse();
+        WorkRecord userWorkRecord;
+        String clockInTimeRecord ="";
+        String clockOutTimeRecord ="";
+        if (userEntity == null) {
+            throw new RuntimeException("SESSION_TIMEOUT");
+        }
+        try {
+            //ユーザーの最新のレコードを取得
+            userWorkRecord = workRecordRepository.findById(id)
+                    .orElseThrow(() -> null);
+        } catch (Exception e) {
+            throw new RuntimeException("ERROR_FETCH_RECORD");
+        }
+        if (userWorkRecord != null){
+            if (userWorkRecord.getClockInTime() != null){
+                clockInTimeRecord = userWorkRecord.getClockInTime().format(DTF_HHMM);
+            }
+            if(userWorkRecord.getClockOutTime() != null){
+                clockOutTimeRecord = userWorkRecord.getClockOutTime().format(DTF_HHMM);
+            }
+        }
+        res.setClockInTime(clockInTimeRecord);
+        res.setClockOutTime(clockOutTimeRecord);
+        return res;
+    }
+
+    public WorkRecordResponse handleClockIn(UserEntity userEntity){
+        WorkRecordResponse wokRecordResponse = new WorkRecordResponse();
+        WorkRecord userWorkRecord;
+        boolean gpsResult = false;
+        if (userEntity == null) {
+            throw new RuntimeException("SESSION_TIMEOUT"); //コントローラでMg設定
+        }
+        //位置判定結果を取得
+//        gpsResult = checkGps(lat,lon,userName);
+        //出勤登録
+        try {
+            registerClockIn(userEntity.getUsername(),gpsResult);
+        } catch (Exception e) {
+            throw new RuntimeException("clockInResult エラーが発生しました");
+        }
+        //ユーザーの最新のレコードを取得
+        try {
+            userWorkRecord = workRecordRepository.findTopByUsernameOrderByClockInTimeDesc(userEntity.getUsername());
+        } catch (Exception e) {
+            throw new RuntimeException("レコードを取得エラーが発生しました");
+        }
+        //レスポンス設定
+        wokRecordResponse.setId(userWorkRecord.getId());
+        wokRecordResponse.setMessage("出勤打刻しました");
+        wokRecordResponse.setClockInTime(userWorkRecord.getClockInTime().format(DTF_HHMM));
+        return wokRecordResponse;
+    }
 
     //出勤登録し位置判定結果を返す
-    public boolean clockInResult(String userName,double lat,double lon){
-        //位置判定結果を取得
-//        boolean gpsResult = checkGps(lat,lon,userName);
+    public void registerClockIn(String userName,boolean gpsResult){
         //DBへ出勤記録を登録
         WorkRecord record = new WorkRecord();
         record.setUsername(userName);
         record.setClockInTime(LocalDateTime.now());
-//        record.setClockInJudge(gpsResult);
+        record.setClockInJudge(gpsResult);
         workRecordRepository.save(record);
-        return false;
     }
 
     //退勤登録し位置判定結果を返す
-    public boolean clockOutResult(Long id, String userName,double lat,double lon){
-        WorkRecord record = workRecordRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
+    public WorkRecordResponse handleClockOut(Long id, String userName, double lat, double lon){
+        WorkRecordResponse res = new WorkRecordResponse();
+        WorkRecord userWorkRecord ;
         //位置判定処理の結果
         boolean gpsResult = checkGps (lat,lon,userName);
         //DBへ退勤記録を登録
+        WorkRecord record = workRecordRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
         record.setClockOutTime(LocalDateTime.now());
         record.setClockOutJudge(gpsResult);
         workRecordRepository.save(record);
-        return gpsResult;
-    }
-    //ユーザーの勤務記録を取得しソートして返す
-    public List<WorkRecord> getUserRecordsByUsernameSort(String username){
-        return workRecordRepository.findByUsername(username, Sort.by(Sort.Order.asc("clockInTime")) );
+        //ユーザーの最新のレコードを取得
+        try {
+            userWorkRecord = workRecordRepository.findTopByUsernameOrderByClockInTimeDesc(userName);
+        } catch (Exception e) {
+            throw new RuntimeException("レコード取得エラーが発生しました");
+        }
+        //レスポンス設定
+        res.setClockOutTime(userWorkRecord.getClockOutTime().format(DTF_HHMM));
+        res.setMessage("退勤打刻しました");
+        return res;
     }
     //DBから出退勤記録取消
     public void deleteWorkRecord(long id){
@@ -62,6 +146,12 @@ public class WorkRecordService {
                 .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
         workRecordRepository.delete(record);
     }
+
+    //ユーザーの勤務記録を取得しソートして返す
+    public List<WorkRecord> getUserRecordsByUsernameSort(String username){
+        return workRecordRepository.findByUsername(username, Sort.by(Sort.Order.asc("clockInTime")) );
+    }
+
     //管理者判定
     public boolean judgeRoles(String userName){
         Optional<UserEntity> user = userRepository.findByUsername(userName);

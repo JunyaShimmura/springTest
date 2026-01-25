@@ -1,6 +1,5 @@
 // 地図オブジェクトを保持する変数
 let leafletMap = null;
-
 /**
  * 地図を表示するメイン関数
  */
@@ -77,6 +76,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // ログイン直後の時だけ自動実行する場合（HTMLのdata属性を確認）
     const justLogin = document.body.dataset.justLogin;
 //    if (justLogin === "true") {
-        displayMap();
+//        displayMap();
 //    }
 });

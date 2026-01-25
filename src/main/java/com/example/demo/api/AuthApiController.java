@@ -30,7 +30,6 @@ public class AuthApiController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req, HttpSession session) {
         Optional<UserEntity> userOpt = userRepository.findByUsername(req.getUsername());
 
-        // 1. まず存在チェック
         if (userOpt.isPresent()) {
             UserEntity user = userOpt.get();
 
@@ -44,10 +43,10 @@ public class AuthApiController {
                         AuthorityUtils.createAuthorityList(roleWithPrefix)
                 );
 
-                // 4. 認証情報をセット
+                //  認証情報をセット
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
-                // 5. ★最重要：セッションに認証コンテキストを保存（403対策）
+                // ：セッションに認証コンテキストを保存（403対策）
                 session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
                 // Sessionにユーザーオブジェクトを保存
                 session.setAttribute("user", user);
