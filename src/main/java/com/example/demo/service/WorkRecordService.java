@@ -21,7 +21,6 @@ public class WorkRecordService {
     @Autowired
     private final UserRepository userRepository;
     private final WorkRecordRepository workRecordRepository;
-    private WorkRecordService workRecordService;
 
     @Autowired
     public  WorkRecordService (UserRepository userRepository ,WorkRecordRepository workRecordRepository){
@@ -107,7 +106,7 @@ public class WorkRecordService {
         return wokRecordResponse;
     }
 
-    //出勤登録し位置判定結果を返す
+    //出勤登録
     public void registerClockIn(String userName,boolean gpsResult){
         //DBへ出勤記録を登録
         WorkRecord record = new WorkRecord();
@@ -117,12 +116,13 @@ public class WorkRecordService {
         workRecordRepository.save(record);
     }
 
-    //退勤登録し位置判定結果を返す
+    //退勤登録
     public WorkRecordResponse handleClockOut(Long id, String userName, double lat, double lon){
-        WorkRecordResponse res = new WorkRecordResponse();
+        WorkRecordResponse workRecordResponse = new WorkRecordResponse();
         WorkRecord userWorkRecord ;
+        boolean gpsResult = false;
         //位置判定処理の結果
-        boolean gpsResult = checkGps (lat,lon,userName);
+        gpsResult = checkGps (lat,lon,userName);
         //DBへ退勤記録を登録
         WorkRecord record = workRecordRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
@@ -136,15 +136,18 @@ public class WorkRecordService {
             throw new RuntimeException("レコード取得エラーが発生しました");
         }
         //レスポンス設定
-        res.setClockOutTime(userWorkRecord.getClockOutTime().format(DTF_HHMM));
-        res.setMessage("退勤打刻しました");
-        return res;
+        workRecordResponse.setClockOutTime(userWorkRecord.getClockOutTime().format(DTF_HHMM));
+        workRecordResponse.setMessage("退勤打刻しました");
+        return workRecordResponse;
     }
     //DBから出退勤記録取消
-    public void deleteWorkRecord(long id){
+    public WorkRecordResponse deleteWorkRecord(long id){
         WorkRecord record = workRecordRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
         workRecordRepository.delete(record);
+        WorkRecordResponse res = new WorkRecordResponse();
+        res.setMessage("取り消しました");
+        return res;
     }
 
     //ユーザーの勤務記録を取得しソートして返す

@@ -67,8 +67,6 @@ public class AttendanceApiController {
         UserEntity user = (UserEntity) session.getAttribute("user");
         WorkRecordResponse res;
         try {
-            //ユーザーの最新のレコードを取得
-            // 退勤登録 位置判定結果　workRecordService
            res = workRecordService.handleClockOut(id,user.getUsername(),1.0,1.0);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getMessage());
@@ -78,17 +76,15 @@ public class AttendanceApiController {
     }
     @PostMapping("/cancel/{id}")
     public ResponseEntity<?> cancel(@PathVariable Long id, HttpSession session) {
+        WorkRecordResponse res;
         try {
             //DBから出退勤記録取消
-            workRecordService.deleteWorkRecord(id);
+            res = workRecordService.deleteWorkRecord(id);
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body("打刻エラーが発生しました");
         }
-        // 成功したら「新しい状態」を返してあげる
-        return ResponseEntity.ok(Map.of(
-                "message", "取り消しました"
-        ));
+        return ResponseEntity.ok(res);
     }
     @GetMapping("/work-records")
     public List<WorkRecordDto> getAllWorkRecords(HttpSession session) {
