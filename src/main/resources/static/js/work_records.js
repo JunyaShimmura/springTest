@@ -51,7 +51,8 @@ function filterByMonthTable(month) {
     textShowMonth.textContent = `${year}年${month}月`;
     //　選択された月の記録を取得
     const filtered = allRecords.filter(record => {
-        const date = new Date(record.lowDateTime);
+        //フォーマットされていない日時から　日付計算
+        const date = new Date(record.rawDateTime);
         return date.getMonth() + 1 === month;
     });
     if (filtered.length === 0) {

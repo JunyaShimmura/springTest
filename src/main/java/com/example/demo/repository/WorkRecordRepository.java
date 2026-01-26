@@ -1,15 +1,15 @@
 package com.example.demo.repository;
 
-import com.example.demo.model.WorkRecord;
+import com.example.demo.model.WorkRecordEntity;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface WorkRecordRepository extends JpaRepository<WorkRecord,Long> {
+public interface WorkRecordRepository extends JpaRepository<WorkRecordEntity,Long> {
 
 
-    WorkRecord findTopByUsernameOrderByClockInTimeDesc(String username);
+    WorkRecordEntity findTopByUsernameOrderByClockInTimeDesc(String username);
 
-    List<WorkRecord> findByUsername(String username, Sort sort);
+    List<WorkRecordEntity> findByUsername(String username, Sort sort);
 }

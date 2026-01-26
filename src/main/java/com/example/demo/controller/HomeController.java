@@ -1,8 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.WorkRecordDto;
 import com.example.demo.model.UserEntity;
-import com.example.demo.model.WorkRecord;
+import com.example.demo.model.WorkRecordEntity;
 import com.example.demo.model.UserInfoResponse;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WorkRecordRepository;
@@ -101,8 +100,8 @@ public class HomeController {
         session.setAttribute("showUserName",showUserName);
         model.addAttribute("showUserName",showUserName);
         //test用
-        List<WorkRecordDto> workRecordsList = workRecordService.getUserRecordsDto(loginUserName);
-        model.addAttribute("workRecordsList",workRecordsList);
+//        List<WorkRecordDtoBK> workRecordsList = workRecordService.getUserRecordsDto(loginUserName);
+//        model.addAttribute("workRecordsList",workRecordsList);
         return "work_recordsAdmin";
     }
     @PostMapping("/work_recordsAdmin/cancel/{id}")
@@ -133,7 +132,7 @@ public class HomeController {
         LocalDateTime checkOutDateTime = LocalDateTime.of(date,checkOutTime);
         String user = (String) session.getAttribute("showUserName");
         //DBへ追加
-        WorkRecord record = new WorkRecord();
+        WorkRecordEntity record = new WorkRecordEntity();
         record.setUsername(user);
         record.setClockInTime(checkInDateTime);
         record.setClockOutTime(checkOutDateTime);

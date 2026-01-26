@@ -1,9 +1,7 @@
 package com.example.demo.api;
 
-import com.example.demo.dto.WorkRecordDto;
 import com.example.demo.model.UserEntity;
-import com.example.demo.model.WorkRecord;
-import com.example.demo.model.WorkRecordResponse;
+import com.example.demo.model.WorkRecordDto;
 import com.example.demo.repository.WorkRecordRepository;
 import com.example.demo.service.WorkRecordService;
 import jakarta.servlet.http.HttpSession;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/attendance")
@@ -29,7 +26,7 @@ public class AttendanceApiController {
     @PostMapping("/getWorkRecord/{id}")
     public ResponseEntity<?> getWorkRecord (@PathVariable Long id, HttpSession session) {
 
-        WorkRecordResponse res = new WorkRecordResponse();
+        WorkRecordDto res = new WorkRecordDto();
         // セッションから丸ごと保存したユーザー情報を取り出す
         UserEntity userEntity = (UserEntity) session.getAttribute("user");
         try {
@@ -50,7 +47,7 @@ public class AttendanceApiController {
     public ResponseEntity<?> punchIn(HttpSession session) {
 
         UserEntity userEntity = (UserEntity) session.getAttribute("user");
-        WorkRecordResponse res;
+        WorkRecordDto res;
         try {
             res = workRecordService.handleClockIn(userEntity);
         } catch (Exception e) {
@@ -65,7 +62,7 @@ public class AttendanceApiController {
     @PostMapping("/punch-out/{id}")
     public ResponseEntity<?> punchOut(@PathVariable Long id,HttpSession session) {
         UserEntity user = (UserEntity) session.getAttribute("user");
-        WorkRecordResponse res;
+        WorkRecordDto res;
         try {
            res = workRecordService.handleClockOut(id,user.getUsername(),1.0,1.0);
         } catch (Exception e) {
@@ -76,7 +73,7 @@ public class AttendanceApiController {
     }
     @PostMapping("/cancel/{id}")
     public ResponseEntity<?> cancel(@PathVariable Long id, HttpSession session) {
-        WorkRecordResponse res;
+        WorkRecordDto res;
         try {
             //DBから出退勤記録取消
             res = workRecordService.deleteWorkRecord(id);

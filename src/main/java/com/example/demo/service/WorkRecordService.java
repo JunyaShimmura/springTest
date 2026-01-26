@@ -1,8 +1,7 @@
 package com.example.demo.service;
-import com.example.demo.dto.WorkRecordDto;
 import com.example.demo.model.UserEntity;
-import com.example.demo.model.WorkRecord;
-import com.example.demo.model.WorkRecordResponse;
+import com.example.demo.model.WorkRecordEntity;
+import com.example.demo.model.WorkRecordDto;
 import com.example.demo.model.UserInfoResponse;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WorkRecordRepository;
@@ -28,6 +27,7 @@ public class WorkRecordService {
         this.workRecordRepository = workRecordRepository;
     }
     DateTimeFormatter DTF_HHMM = DateTimeFormatter.ofPattern("HH:mm");
+    DateTimeFormatter DTF_MMDD = DateTimeFormatter.ofPattern("MM:dd");
 
 
     public UserInfoResponse workSubmitInit(String username) {
@@ -38,11 +38,11 @@ public class WorkRecordService {
         String workPlace = userRecord.get().getWorkPlace();
 
         //ユーザーの最新のレコードを取得　　　　　　　　
-        WorkRecord userWorkRecord = workRecordRepository.findTopByUsernameOrderByClockInTimeDesc(username);
-        if ((!(userWorkRecord == null)) && (userWorkRecord.getClockInTime() != null)) {
+        WorkRecordEntity userWorkRecordEntity = workRecordRepository.findTopByUsernameOrderByClockInTimeDesc(username);
+        if ((!(userWorkRecordEntity == null)) && (userWorkRecordEntity.getClockInTime() != null)) {
             //当日のレコードがあるか判定
-            if (userWorkRecord.getClockInTime().toLocalDate().equals(LocalDate.now())) {
-                todayRecordId = userWorkRecord.getId();
+            if (userWorkRecordEntity.getClockInTime().toLocalDate().equals(LocalDate.now())) {
+                todayRecordId = userWorkRecordEntity.getId();
             }
         }
         userInfoResponse.setUsername(username);
@@ -50,9 +50,9 @@ public class WorkRecordService {
         userInfoResponse.setWorkPlace(workPlace);
         return userInfoResponse;
     }
-    public WorkRecordResponse handleGetWorkRecord(UserEntity userEntity,Long id){
-        WorkRecordResponse res = new WorkRecordResponse();
-        WorkRecord userWorkRecord;
+    public WorkRecordDto handleGetWorkRecord(UserEntity userEntity, Long id){
+        WorkRecordDto res = new WorkRecordDto();
+        WorkRecordEntity userWorkRecordEntity;
         String clockInTimeRecord ="";
         String clockOutTimeRecord ="";
         if (userEntity == null) {
@@ -60,17 +60,17 @@ public class WorkRecordService {
         }
         try {
             //ユーザーの最新のレコードを取得
-            userWorkRecord = workRecordRepository.findById(id)
+            userWorkRecordEntity = workRecordRepository.findById(id)
                     .orElseThrow(() -> null);
         } catch (Exception e) {
             throw new RuntimeException("ERROR_FETCH_RECORD");
         }
-        if (userWorkRecord != null){
-            if (userWorkRecord.getClockInTime() != null){
-                clockInTimeRecord = userWorkRecord.getClockInTime().format(DTF_HHMM);
+        if (userWorkRecordEntity != null){
+            if (userWorkRecordEntity.getClockInTime() != null){
+                clockInTimeRecord = userWorkRecordEntity.getClockInTime().format(DTF_HHMM);
             }
-            if(userWorkRecord.getClockOutTime() != null){
-                clockOutTimeRecord = userWorkRecord.getClockOutTime().format(DTF_HHMM);
+            if(userWorkRecordEntity.getClockOutTime() != null){
+                clockOutTimeRecord = userWorkRecordEntity.getClockOutTime().format(DTF_HHMM);
             }
         }
         res.setClockInTime(clockInTimeRecord);
@@ -78,9 +78,9 @@ public class WorkRecordService {
         return res;
     }
 
-    public WorkRecordResponse handleClockIn(UserEntity userEntity){
-        WorkRecordResponse wokRecordResponse = new WorkRecordResponse();
-        WorkRecord userWorkRecord;
+    public WorkRecordDto handleClockIn(UserEntity userEntity){
+        WorkRecordDto workRecordDto = new WorkRecordDto();
+        WorkRecordEntity userWorkRecordEntity;
         boolean gpsResult = false;
         if (userEntity == null) {
             throw new RuntimeException("SESSION_TIMEOUT"); //コントローラでMg設定
@@ -95,21 +95,21 @@ public class WorkRecordService {
         }
         //ユーザーの最新のレコードを取得
         try {
-            userWorkRecord = workRecordRepository.findTopByUsernameOrderByClockInTimeDesc(userEntity.getUsername());
+            userWorkRecordEntity = workRecordRepository.findTopByUsernameOrderByClockInTimeDesc(userEntity.getUsername());
         } catch (Exception e) {
             throw new RuntimeException("レコードを取得エラーが発生しました");
         }
         //レスポンス設定
-        wokRecordResponse.setId(userWorkRecord.getId());
-        wokRecordResponse.setMessage("出勤打刻しました");
-        wokRecordResponse.setClockInTime(userWorkRecord.getClockInTime().format(DTF_HHMM));
-        return wokRecordResponse;
+        workRecordDto.setId(userWorkRecordEntity.getId());
+        workRecordDto.setMessage("出勤打刻しました");
+        workRecordDto.setClockInTime(userWorkRecordEntity.getClockInTime().format(DTF_HHMM));
+        return workRecordDto;
     }
 
     //出勤登録
     public void registerClockIn(String userName,boolean gpsResult){
         //DBへ出勤記録を登録
-        WorkRecord record = new WorkRecord();
+        WorkRecordEntity record = new WorkRecordEntity();
         record.setUsername(userName);
         record.setClockInTime(LocalDateTime.now());
         record.setClockInJudge(gpsResult);
@@ -117,41 +117,61 @@ public class WorkRecordService {
     }
 
     //退勤登録
-    public WorkRecordResponse handleClockOut(Long id, String userName, double lat, double lon){
-        WorkRecordResponse workRecordResponse = new WorkRecordResponse();
-        WorkRecord userWorkRecord ;
+    public WorkRecordDto handleClockOut(Long id, String userName, double lat, double lon){
+        WorkRecordDto workRecordDto = new WorkRecordDto();
+        WorkRecordEntity userWorkRecordEntity;
+
         boolean gpsResult = false;
         //位置判定処理の結果
         gpsResult = checkGps (lat,lon,userName);
         //DBへ退勤記録を登録
-        WorkRecord record = workRecordRepository.findById(id)
+        WorkRecordEntity record = workRecordRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
         record.setClockOutTime(LocalDateTime.now());
         record.setClockOutJudge(gpsResult);
         workRecordRepository.save(record);
         //ユーザーの最新のレコードを取得
         try {
-            userWorkRecord = workRecordRepository.findTopByUsernameOrderByClockInTimeDesc(userName);
+            userWorkRecordEntity = workRecordRepository.findTopByUsernameOrderByClockInTimeDesc(userName);
         } catch (Exception e) {
             throw new RuntimeException("レコード取得エラーが発生しました");
         }
         //レスポンス設定
-        workRecordResponse.setClockOutTime(userWorkRecord.getClockOutTime().format(DTF_HHMM));
-        workRecordResponse.setMessage("退勤打刻しました");
-        return workRecordResponse;
+        workRecordDto.setClockOutTime(userWorkRecordEntity.getClockOutTime().format(DTF_HHMM));
+        workRecordDto.setMessage("退勤打刻しました");
+        return workRecordDto;
     }
     //DBから出退勤記録取消
-    public WorkRecordResponse deleteWorkRecord(long id){
-        WorkRecord record = workRecordRepository.findById(id)
+    public WorkRecordDto deleteWorkRecord(long id){
+        WorkRecordEntity record = workRecordRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("レコードがみつかりません id:" + id));
         workRecordRepository.delete(record);
-        WorkRecordResponse res = new WorkRecordResponse();
-        res.setMessage("取り消しました");
-        return res;
+        WorkRecordDto workRecordDto = new WorkRecordDto();
+        workRecordDto.setMessage("取り消しました");
+        return workRecordDto;
+    }
+    //ユーザーの勤務記録を取得しソートして返す
+    public List<WorkRecordDto> getUserRecordsDto(String username){
+        List<WorkRecordEntity> userRecordsList = workRecordRepository.findByUsername(username, Sort.by(Sort.Order.asc("clockInTime")) );
+        List<WorkRecordDto> workRecordDtoList = new ArrayList<>();
+        for ( WorkRecordEntity workRecordEntity :userRecordsList) {
+            WorkRecordDto dto = new WorkRecordDto();
+            if (workRecordEntity.getClockInTime() != null){
+                //日付計算用のため　フォーマットなしの日時を渡す
+                dto.setRawDateTime(workRecordEntity.getClockInTime());
+                dto.setDate(workRecordEntity.getClockInTime().format(DTF_MMDD));
+                dto.setClockInTime(workRecordEntity.getClockInTime().format(DTF_HHMM));
+            }
+            if (workRecordEntity.getClockOutTime() != null){
+                dto.setClockOutTime(workRecordEntity.getClockOutTime().format(DTF_HHMM));
+            }
+            workRecordDtoList.add(dto);
+        }
+        return workRecordDtoList;
     }
 
     //ユーザーの勤務記録を取得しソートして返す
-    public List<WorkRecord> getUserRecordsByUsernameSort(String username){
+    public List<WorkRecordEntity> getUserRecordsByUsernameSort(String username){
         return workRecordRepository.findByUsername(username, Sort.by(Sort.Order.asc("clockInTime")) );
     }
 
@@ -189,24 +209,14 @@ public class WorkRecordService {
     public List<String> getAllUserName(){
         return userRepository.findAllUserName();
     }
-    //ユーザーの勤務記録を取得しソートして返す
-    public List<WorkRecordDto> getUserRecordsDto(String username){
-        List<WorkRecord> userRecords = workRecordRepository.findByUsername(username, Sort.by(Sort.Order.asc("clockInTime")) );
-        List<WorkRecordDto> dtos = new ArrayList<>();
-        for (WorkRecord record : userRecords){
-        //    dtos.add(new WorkRecordDto(record));
-            WorkRecordDto dto = new WorkRecordDto(record);
-            dtos.add(dto);
-        }
-        return dtos;
-    }
-    public WorkRecord saveWorkRecord(WorkRecord workRecord){
-        return workRecordRepository.save(workRecord);
+
+    public WorkRecordEntity saveWorkRecord(WorkRecordEntity workRecordEntity){
+        return workRecordRepository.save(workRecordEntity);
     }
 
 
     //全ての勤務記録を取得
-    public List<WorkRecord> getAllWorkRecords(){
+    public List<WorkRecordEntity> getAllWorkRecords(){
         return workRecordRepository.findAll();
     }
     public List<UserEntity> getAllUserEntity(){
