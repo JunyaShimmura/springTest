@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,16 +26,17 @@ public class AuthApiController {
 
     @Autowired
     private UserRepository userRepository; // もしくはService経由で
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @PostMapping("/login") // パスをAPI用に少しずらすのが安全
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req, HttpSession session) {
-        Optional<UserEntity> userOpt = userRepository.findByUsername(req.getUsername());
+        Optional<UserEntity> userEntity = userRepository.findByUsername(req.getUsername());
 
-        if (userOpt.isPresent()) {
-            UserEntity user = userOpt.get();
-
+        if (userEntity.isPresent()) {
+            UserEntity user = userEntity.get();
             // 2. パスワード比較
-            if (user.getPassword().equals(req.getPassword())) {
+            if (passwordEncoder.matches(req.getPassword(),user.getPassword())) {
                 // 3. 権限セット (ROLE_ADMIN)
                 String roleWithPrefix = "ROLE_" + user.getRoles();
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(

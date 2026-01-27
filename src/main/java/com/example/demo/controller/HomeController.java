@@ -53,10 +53,10 @@ public class HomeController {
     public String work_submit(HttpSession session, Model model) {
         // Sessionからユーザー情報を取り出す　（ログイン時保存）
         UserEntity user = (UserEntity) session.getAttribute("user");
-        String username = user.getUsername();
-        if (username == null) {
+        if (user == null) {
             return "redirect:/"; // 未ログインならログインページへ
         }
+        String username = user.getUsername();
         UserInfoResponse workSubmitDto = workRecordService.workSubmitInit(username);
         model.addAttribute("username", username);
         model.addAttribute("todayRecordId",workSubmitDto.getTodayRecordId());

@@ -64,8 +64,8 @@ function filterByMonthTable(month) {
     const row = document.createElement("tr");
     row.innerHTML = `
     <td>${record.date}</td>
-    <td>${record.clockInTime}</td>
-    <td>${record.clockOutTime}</td>
+    <td>${record.clockInTime ?? ""}</td>
+    <td>${record.clockOutTime ?? ""}</td>
     `;
     tbody.appendChild(row);
     });
