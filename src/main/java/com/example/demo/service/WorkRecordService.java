@@ -53,8 +53,6 @@ public class WorkRecordService {
     public WorkRecordDto handleGetWorkRecord(UserEntity userEntity, Long id){
         WorkRecordDto res = new WorkRecordDto();
         WorkRecordEntity userWorkRecordEntity;
-        String clockInTimeRecord ="";
-        String clockOutTimeRecord ="";
         if (userEntity == null) {
             throw new RuntimeException("SESSION_TIMEOUT");
         }
@@ -67,14 +65,12 @@ public class WorkRecordService {
         }
         if (userWorkRecordEntity != null){
             if (userWorkRecordEntity.getClockInTime() != null){
-                clockInTimeRecord = userWorkRecordEntity.getClockInTime().format(DTF_HHMM);
+                res.setClockInTime(userWorkRecordEntity.getClockInTime());
             }
             if(userWorkRecordEntity.getClockOutTime() != null){
-                clockOutTimeRecord = userWorkRecordEntity.getClockOutTime().format(DTF_HHMM);
+                res.setClockOutTime(userWorkRecordEntity.getClockOutTime());
             }
         }
-        res.setClockInTime(clockInTimeRecord);
-        res.setClockOutTime(clockOutTimeRecord);
         return res;
     }
 
@@ -102,7 +98,7 @@ public class WorkRecordService {
         //レスポンス設定
         workRecordDto.setId(userWorkRecordEntity.getId());
         workRecordDto.setMessage("出勤打刻しました");
-        workRecordDto.setClockInTime(userWorkRecordEntity.getClockInTime().format(DTF_HHMM));
+        workRecordDto.setClockInTime(userWorkRecordEntity.getClockInTime());
         return workRecordDto;
     }
 
@@ -137,7 +133,7 @@ public class WorkRecordService {
             throw new RuntimeException("レコード取得エラーが発生しました");
         }
         //レスポンス設定
-        workRecordDto.setClockOutTime(userWorkRecordEntity.getClockOutTime().format(DTF_HHMM));
+        workRecordDto.setClockOutTime(userWorkRecordEntity.getClockOutTime());
         workRecordDto.setMessage("退勤打刻しました");
         return workRecordDto;
     }
@@ -158,12 +154,8 @@ public class WorkRecordService {
             WorkRecordDto dto = new WorkRecordDto();
             if (workRecordEntity.getClockInTime() != null){
                 //日付計算用のため　フォーマットなしの日時を渡す
-                dto.setRawDateTime(workRecordEntity.getClockInTime());
-                dto.setDate(workRecordEntity.getClockInTime().format(DTF_MMDD));
-                dto.setClockInTime(workRecordEntity.getClockInTime().format(DTF_HHMM));
-            }
-            if (workRecordEntity.getClockOutTime() != null){
-                dto.setClockOutTime(workRecordEntity.getClockOutTime().format(DTF_HHMM));
+                dto.setClockInTime(workRecordEntity.getClockInTime());
+                dto.setClockOutTime(workRecordEntity.getClockOutTime());
             }
             workRecordDtoList.add(dto);
         }

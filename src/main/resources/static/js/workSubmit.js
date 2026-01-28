@@ -1,5 +1,10 @@
 const LIMIT_TIME = 10*60*1000; //10分
 let todayRecordId,lat,lng, tdClockIn, tdClockOut,recordMg, inBtn, outBtn, cancelBtn;
+const FORMAT_TIME = new Intl.DateTimeFormat('ja-JP',{
+    hour:'2-digit',
+    minute: '2-digit'
+});
+
 // ページ読み込み時の処理
 document.addEventListener('DOMContentLoaded',async function() {
     lat = document.getElementById("lat").value;
@@ -56,8 +61,15 @@ async function getWorkRecord(todayRecordId) {
         });
         if (response.ok) {
             const result = await response.json();
-            tdClockIn.textContent = result.clockInTime;
-            tdClockOut.textContent = result.clockOutTime;
+
+            if (result.clockInTime){
+                displayInTime = new Date(result.clockInTime);
+            }
+            if (result.clockOutTime) {
+                displayOutTime = new Date(result.clockOutTime);
+            }
+            tdClockIn.textContent = result.clockInTime ? FORMAT_TIME.format(displayInTime) : "";
+            tdClockOut.textContent = result.clockOutTime ? FORMAT_TIME.format(displayOutTime) : "";
         } else {
             const errorText = await response.text();
             alert("エラー: " + errorText);
@@ -74,7 +86,7 @@ async function handlePunchIn() {
         if (response.ok) {
             const result = await response.json();
             todayRecordId = result.id;
-            tdClockIn.textContent = result.clockInTime;
+            tdClockIn.textContent = FORMAT_TIME.format(new Date(result.clockInTime));
             recordMg.textContent = result.message;
             updateButtonUI();
         } else {
@@ -93,7 +105,7 @@ async function handlePunchOut() {
         });
         if (res.ok) {
             const result = await res.json();
-            tdClockOut.textContent = result.clockOutTime;
+            tdClockOut.textContent = FORMAT_TIME.format(new Date(result.clockOutTime));
             recordMg.textContent = result.message;
             updateButtonUI();
         } else {
@@ -112,6 +124,7 @@ async function handleCancel() {
             });
         if (response.ok) {
             const result = await response.json();
+            //初期化
             todayRecordId = "0";
             tdClockIn.textContent = "";
             tdClockOut.textContent = "";

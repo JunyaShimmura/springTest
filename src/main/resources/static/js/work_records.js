@@ -2,6 +2,16 @@ let allRecords = [];
 var today = new Date();
 const monthSelect = document.getElementById("month");
 
+const DTF_DATE = new Intl.DateTimeFormat('ja-JP',{
+    month: '2-digit',
+    day: '2-digit'
+});
+const DTF_TIME = new Intl.DateTimeFormat('ja-JP',{
+    hour:'2-digit',
+    minute: '2-digit'
+});
+
+
 document.addEventListener("DOMContentLoaded", async() =>{
        // 月の選択項目設定
        settingMonthSelect();
@@ -52,21 +62,27 @@ function filterByMonthTable(month) {
     //　選択された月の記録を取得
     const filtered = allRecords.filter(record => {
         //フォーマットされていない日時から　日付計算
-        const date = new Date(record.rawDateTime);
+        const date = new Date(record.clockInTime);
         return date.getMonth() + 1 === month;
     });
     if (filtered.length === 0) {
         recordMg.textContent = "この月の勤務記録はありません。";
         return;
     }
+
     // フィルター後のデータを表示　tr td タグ追加
     filtered.forEach(record => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-    <td>${record.date}</td>
-    <td>${record.clockInTime ?? ""}</td>
-    <td>${record.clockOutTime ?? ""}</td>
-    `;
-    tbody.appendChild(row);
+        let clockInTime = new Date(record.clockInTime);
+        let clockOutTime = ""; //初期化
+        if (record.clockOutTime){
+            clockOutTime = new Date(record.clockOutTime);
+        }
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${DTF_DATE.format(clockInTime)}</td>
+            <td>${DTF_TIME.format(clockInTime)}</td>
+            <td>${clockOutTime ? DTF_TIME.format(clockOutTime) : ""}</td>
+        `;
+        tbody.appendChild(row);
     });
 }
